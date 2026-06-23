@@ -85,9 +85,10 @@ export async function getPortalData(clientId) {
     ]);
 
     const programBlocks = program ? await normalizeBlocks(program.id) : [];
+    const mealBlocks = meal ? await normalizeBlocks(meal.id) : [];
     const suppBlocks = supp ? await normalizeBlocks(supp.id) : [];
     const supplements = suppBlocks
-      .filter((b) => b.type === "li" || b.type === "p")
+      .filter((b) => b.type === "li")
       .map((b) => b.text.replace(/\*\*/g, ""))
       .filter(Boolean);
 
@@ -111,6 +112,7 @@ export async function getPortalData(clientId) {
       programName: program ? title(program.properties["Program"]) : "Your program",
       programBlocks,
       macros,
+      mealBlocks,
       supplements: supplements.length ? supplements : DEMO.supplements,
       measurements,
       weeklyTarget: null,

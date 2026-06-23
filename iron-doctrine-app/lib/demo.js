@@ -50,6 +50,27 @@ export const DEMO = {
     ] },
   ],
   macros: { kcal: 2500, protein: 150, carbs: 300, fat: 75 },
+  mealBlocks: [
+    { type: "h2", text: "Breakfast" },
+    { type: "table", header: ["Food", "Amount", "Kcal", "P", "C", "F"], rows: [
+      ["Oats", "80 g", "300", "10", "54", "6"],
+      ["Whey protein", "1 scoop", "120", "24", "3", "2"],
+      ["Blueberries", "100 g", "60", "1", "14", "0"],
+    ] },
+    { type: "h2", text: "Lunch" },
+    { type: "table", header: ["Food", "Amount", "Kcal", "P", "C", "F"], rows: [
+      ["Chicken breast", "180 g", "300", "56", "0", "7"],
+      ["White rice (cooked)", "250 g", "320", "6", "70", "1"],
+      ["Olive oil", "1 tbsp", "120", "0", "0", "14"],
+      ["Mixed veg", "150 g", "50", "3", "9", "0"],
+    ] },
+    { type: "h2", text: "Dinner" },
+    { type: "table", header: ["Food", "Amount", "Kcal", "P", "C", "F"], rows: [
+      ["Salmon fillet", "150 g", "280", "34", "0", "16"],
+      ["Potatoes", "300 g", "260", "6", "58", "0"],
+      ["Side salad", "1 bowl", "40", "2", "6", "1"],
+    ] },
+  ],
   supplements: [
     "Creatine · 5g daily",
     "Whey · to hit 150g protein",
