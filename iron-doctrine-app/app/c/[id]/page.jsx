@@ -94,6 +94,12 @@ export default async function Portal({ params }) {
             <div className="macro"><div className="v">{d.macros.carbs || "—"}</div><div className="k">carbs (g)</div></div>
             <div className="macro"><div className="v">{d.macros.fat || "—"}</div><div className="k">fat (g)</div></div>
           </div>
+          {d.mealBlocks && d.mealBlocks.length > 0 && (
+            <div className="meals">
+              <div className="eyebrow" style={{ margin: "34px 0 6px" }}>Your meals</div>
+              <Blocks blocks={d.mealBlocks} />
+            </div>
+          )}
         </div>
       </section>
 
