@@ -124,3 +124,5 @@ footer small{display:block;margin-top:9px;color:var(--cream-dim);font-size:.78re
 .auth-note{color:var(--cream-dim);font-size:.84rem;text-align:center;margin-top:20px;line-height:1.55}
 .auth-error{color:#E89B86;font-size:.9rem;text-align:center;background:rgba(154,61,42,.18);border:1px solid rgba(154,61,42,.45);border-radius:3px;padding:10px 12px}
 .auth-success .big{font-family:'Anton',sans-serif;font-size:1.5rem;color:var(--gold);margin-bottom:12px;text-transform:uppercase;text-align:center}
+.nav-signout{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.16em;font-size:.6rem;color:var(--cream-dim);background:transparent;border:1px solid var(--line);border-radius:2px;padding:7px 11px;cursor:pointer;transition:color .2s,border-color .2s}
+.nav-signout:hover{color:var(--gold);border-color:var(--gold)}

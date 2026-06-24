@@ -63,6 +63,36 @@ async function activeFor(databaseId, clientId) {
   return res.results[0] || null;
 }
 
+// Map a logged-in email to a client's Notion page id (case-insensitive).
+export async function findClientByEmail(email) {
+  if (!hasNotion || !email) return null;
+  const addr = String(email).trim().toLowerCase();
+  if (!addr) return null;
+  try {
+    const res = await notion.databases.query({
+      database_id: DB.clients,
+      filter: { property: "Email", email: { equals: addr } },
+      page_size: 5,
+    });
+    let match = res.results[0];
+    if (!match) {
+      // Fallback: case-insensitive scan in case the stored email differs in case.
+      const all = await notion.databases.query({
+        database_id: DB.clients,
+        page_size: 100,
+      });
+      match = all.results.find((p) => {
+        const e = p.properties && p.properties.Email && p.properties.Email.email;
+        return e && e.toLowerCase() === addr;
+      });
+    }
+    return match ? match.id : null;
+  } catch (err) {
+    console.error("findClientByEmail failed:", err.message);
+    return null;
+  }
+}
+
 export async function getPortalData(clientId) {
   // No token yet, or no id → show the demo so the page always renders.
   if (!hasNotion || !clientId) return { ...DEMO, demo: true };
@@ -72,7 +102,7 @@ export async function getPortalData(clientId) {
     const cp = client.properties;
     const name = title(cp["Name"]) || "Athlete";
     const goal = sel(cp["Primary Goal"]) || "";
-    const lang = normalizeLang(sel(cp["Language"]));
+    const lang = normalizeLang(sel(cp["Language"]) || sel(cp["Select"]));
 
     const [program, meal, supp, measRes] = await Promise.all([
       activeFor(DB.programs, clientId),

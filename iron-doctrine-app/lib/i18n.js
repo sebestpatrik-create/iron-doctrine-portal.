@@ -32,6 +32,7 @@ export const STRINGS = {
     chartEmpty: "Your weight chart appears after your first check-in.",
     programEmpty: "Your program will appear here once it's assigned.",
     demoFlag: "Demo data — connect Notion to show live client data",
+    signOut: "Sign out",
   },
   cz: {
     member: "Klient",
@@ -63,6 +64,7 @@ export const STRINGS = {
     chartEmpty: "Graf váhy se zobrazí po prvním check-inu.",
     programEmpty: "Tvůj plán se zde zobrazí po přiřazení.",
     demoFlag: "Demo data — připoj Notion pro živá data klienta",
+    signOut: "Odhlásit se",
   },
 };
 
