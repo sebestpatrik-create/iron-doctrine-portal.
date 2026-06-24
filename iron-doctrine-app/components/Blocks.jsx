@@ -21,9 +21,9 @@ function Table({ b }) {
   );
 }
 
-export default function Blocks({ blocks }) {
+export default function Blocks({ blocks, emptyText }) {
   if (!blocks || !blocks.length) {
-    return <p className="muted">Your program will appear here once it&apos;s assigned.</p>;
+    return <p className="muted">{emptyText || "Your program will appear here once it\u2019s assigned."}</p>;
   }
   return (
     <div className="blocks">

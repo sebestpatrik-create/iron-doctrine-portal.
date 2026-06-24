@@ -1,8 +1,8 @@
-export default function Chart({ measurements }) {
+export default function Chart({ measurements, lang, emptyText }) {
   const data = (measurements || []).filter((m) => m.weight != null);
 
   if (data.length === 0) {
-    return <p className="muted">Your weight chart appears after your first check-in.</p>;
+    return <p className="muted">{emptyText || "Your weight chart appears after your first check-in."}</p>;
   }
 
   const W = 720, H = 300, padL = 54, padR = 20, padT = 30, padB = 40;
@@ -22,7 +22,7 @@ export default function Chart({ measurements }) {
   for (let v = lo; v <= hi; v++) yTicks.push(v);
 
   const fmt = (iso) => {
-    try { const d = new Date(iso); return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }); }
+    try { const dd = new Date(iso); return dd.toLocaleDateString(lang === "cz" ? "cs-CZ" : "en-GB", { day: "numeric", month: "short" }); }
     catch { return iso; }
   };
 

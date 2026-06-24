@@ -2,6 +2,7 @@
 // Once your NOTION_TOKEN is set, real client data replaces this automatically.
 
 export const DEMO = {
+  lang: "en",
   name: "Petra",
   goal: "Build muscle",
   weekLabel: "5-Day Hypertrophy Split · Week 1 of 4",

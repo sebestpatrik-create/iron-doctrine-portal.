@@ -1,12 +1,17 @@
 import { getPortalData } from "../../../lib/notion.js";
 import Blocks from "../../../components/Blocks.jsx";
 import Chart from "../../../components/Chart.jsx";
+import { t, translateGoal } from "../../../lib/i18n.js";
 
 // Always read fresh from Notion so edits show up live.
 export const dynamic = "force-dynamic";
 
-export default async function Portal({ params }) {
+export default async function Portal({ params, searchParams }) {
   const d = await getPortalData(params.id);
+
+  // Language: ?lang=cz|en overrides for preview; otherwise the client's own setting.
+  const override = searchParams?.lang;
+  const lang = override === "cz" || override === "en" ? override : d.lang || "en";
 
   const initials = (d.name || "?")
     .split(" ")
@@ -23,12 +28,12 @@ export default async function Portal({ params }) {
 
   return (
     <>
-      {d.demo && <div className="demo-flag">Demo data — connect Notion to show live client data</div>}
+      {d.demo && <div className="demo-flag">{t(lang, "demoFlag")}</div>}
 
       <nav>
         <a href="/" className="brand">Iron <b>Doctrine</b></a>
         <div className="member">
-          <span className="label">Member</span>
+          <span className="label">{t(lang, "member")}</span>
           <div className="avatar">{initials}</div>
         </div>
       </nav>
@@ -50,11 +55,11 @@ export default async function Portal({ params }) {
         </svg>
         <div className="wrap hero-inner">
           {d.weekLabel && <div className="hero-eyebrow eyebrow">{d.weekLabel}</div>}
-          <h1 className="greet">Welcome back,<br /><b>{d.name}</b></h1>
-          <p className="hero-line">{d.todayNote}</p>
+          <h1 className="greet">{t(lang, "welcomeBack")}<br /><b>{d.name}</b></h1>
+          <p className="hero-line">{t(lang, "todayDefault")}</p>
           <div className="actions">
-            <a href={sessionForm} className="btn btn-primary" target="_blank" rel="noopener">Log today&apos;s session →</a>
-            <a href="#program" className="btn btn-ghost">This week&apos;s plan</a>
+            <a href={sessionForm} className="btn btn-primary" target="_blank" rel="noopener">{t(lang, "logSession")}</a>
+            <a href="#program" className="btn btn-ghost">{t(lang, "thisWeeksPlan")}</a>
           </div>
         </div>
       </header>
@@ -62,24 +67,24 @@ export default async function Portal({ params }) {
       <section id="program">
         <div className="wrap">
           <div className="sec-head">
-            <div><div className="eyebrow">Your program</div><h2 className="sec-title">{d.programName}</h2></div>
+            <div><div className="eyebrow">{t(lang, "program")}</div><h2 className="sec-title">{d.programName}</h2></div>
           </div>
-          <Blocks blocks={d.programBlocks} />
+          <Blocks blocks={d.programBlocks} emptyText={t(lang, "programEmpty")} />
         </div>
       </section>
 
       <section id="progress">
         <div className="wrap">
-          <div className="sec-head"><div><div className="eyebrow">Progress</div><h2 className="sec-title">The Climb</h2></div></div>
+          <div className="sec-head"><div><div className="eyebrow">{t(lang, "progress")}</div><h2 className="sec-title">{t(lang, "theClimb")}</h2></div></div>
           <div className="prog-grid">
             <div className="chart-card">
-              <h3>Bodyweight over time</h3>
-              <Chart measurements={d.measurements} />
+              <h3>{t(lang, "bodyweight")}</h3>
+              <Chart measurements={d.measurements} lang={lang} emptyText={t(lang, "chartEmpty")} />
             </div>
             <div className="stat-stack">
-              <div className="stat"><span className="k">Starting weight</span><span className="v">{start != null ? start : "—"}<small>kg</small></span></div>
-              <div className="stat"><span className="k">Latest</span><span className="v">{latest != null ? latest : "—"}<small>kg</small></span></div>
-              <div className="stat"><span className="k">Goal</span><span className="v" style={{ fontSize: "1.3rem" }}>{d.goal || "—"}</span></div>
+              <div className="stat"><span className="k">{t(lang, "startingWeight")}</span><span className="v">{start != null ? start : "—"}<small>kg</small></span></div>
+              <div className="stat"><span className="k">{t(lang, "latest")}</span><span className="v">{latest != null ? latest : "—"}<small>kg</small></span></div>
+              <div className="stat"><span className="k">{t(lang, "goal")}</span><span className="v" style={{ fontSize: "1.3rem" }}>{translateGoal(lang, d.goal) || "—"}</span></div>
             </div>
           </div>
         </div>
@@ -87,16 +92,16 @@ export default async function Portal({ params }) {
 
       <section id="nutrition">
         <div className="wrap">
-          <div className="sec-head"><div><div className="eyebrow">Fuel</div><h2 className="sec-title">Your Plate</h2></div></div>
+          <div className="sec-head"><div><div className="eyebrow">{t(lang, "fuel")}</div><h2 className="sec-title">{t(lang, "yourPlate")}</h2></div></div>
           <div className="macros">
-            <div className="macro kcal"><div className="v">{d.macros.kcal ? d.macros.kcal.toLocaleString() : "—"}</div><div className="k">kcal / day</div></div>
-            <div className="macro"><div className="v">{d.macros.protein || "—"}</div><div className="k">protein (g)</div></div>
-            <div className="macro"><div className="v">{d.macros.carbs || "—"}</div><div className="k">carbs (g)</div></div>
-            <div className="macro"><div className="v">{d.macros.fat || "—"}</div><div className="k">fat (g)</div></div>
+            <div className="macro kcal"><div className="v">{d.macros.kcal ? d.macros.kcal.toLocaleString() : "—"}</div><div className="k">{t(lang, "kcalDay")}</div></div>
+            <div className="macro"><div className="v">{d.macros.protein || "—"}</div><div className="k">{t(lang, "proteinG")}</div></div>
+            <div className="macro"><div className="v">{d.macros.carbs || "—"}</div><div className="k">{t(lang, "carbsG")}</div></div>
+            <div className="macro"><div className="v">{d.macros.fat || "—"}</div><div className="k">{t(lang, "fatG")}</div></div>
           </div>
           {d.mealBlocks && d.mealBlocks.length > 0 && (
             <div className="meals">
-              <div className="eyebrow" style={{ margin: "34px 0 6px" }}>Your meals</div>
+              <div className="eyebrow" style={{ margin: "34px 0 6px" }}>{t(lang, "yourMeals")}</div>
               <Blocks blocks={d.mealBlocks} />
             </div>
           )}
@@ -106,7 +111,7 @@ export default async function Portal({ params }) {
       {d.supplements && d.supplements.length > 0 && (
         <section id="supps">
           <div className="wrap">
-            <div className="sec-head"><div><div className="eyebrow">Stack</div><h2 className="sec-title">Daily Supplements</h2></div></div>
+            <div className="sec-head"><div><div className="eyebrow">{t(lang, "stack")}</div><h2 className="sec-title">{t(lang, "dailySupplements")}</h2></div></div>
             <div className="supps">
               {d.supplements.map((s, i) => <div key={i} className="supp">{s}</div>)}
             </div>
@@ -116,17 +121,17 @@ export default async function Portal({ params }) {
 
       <section className="band">
         <div className="wrap">
-          <div className="eyebrow">Weekly check-in</div>
-          <h2 className="sec-title">Send your numbers</h2>
-          <p>Weigh in first thing, log your measurements, and watch the climb. One minute a week is the whole job.</p>
-          <a href={checkinForm} className="btn btn-primary" target="_blank" rel="noopener">Submit check-in →</a>
+          <div className="eyebrow">{t(lang, "weeklyCheckin")}</div>
+          <h2 className="sec-title">{t(lang, "sendNumbers")}</h2>
+          <p>{t(lang, "checkinBlurb")}</p>
+          <a href={checkinForm} className="btn btn-primary" target="_blank" rel="noopener">{t(lang, "submitCheckin")}</a>
         </div>
       </section>
 
       <footer>
         <div className="wrap">
           <div className="fmark">Iron <b>Doctrine</b></div>
-          <small>Coached by Bc. Patrik Šebest · Praha</small>
+          <small>{t(lang, "coachedBy")}</small>
         </div>
       </footer>
     </>

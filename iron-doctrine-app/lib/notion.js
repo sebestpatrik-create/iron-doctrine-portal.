@@ -1,5 +1,6 @@
 import { Client } from "@notionhq/client";
 import { DEMO } from "./demo.js";
+import { normalizeLang } from "./i18n.js";
 
 // Your Notion database IDs (already filled in from your workspace).
 // You can override any of these with environment variables on Vercel if they ever change.
@@ -71,6 +72,7 @@ export async function getPortalData(clientId) {
     const cp = client.properties;
     const name = title(cp["Name"]) || "Athlete";
     const goal = sel(cp["Primary Goal"]) || "";
+    const lang = normalizeLang(sel(cp["Language"]));
 
     const [program, meal, supp, measRes] = await Promise.all([
       activeFor(DB.programs, clientId),
@@ -107,9 +109,10 @@ export async function getPortalData(clientId) {
     return {
       name,
       goal,
-      weekLabel: program ? title(program.properties["Program"]) : goal,
-      todayNote: `Your plan is ready. Five quality sessions beat fifty half-hearted ones.`,
-      programName: program ? title(program.properties["Program"]) : "Your program",
+      lang,
+      weekLabel: program ? title(program.properties["Program"]) : "",
+      todayNote: null,
+      programName: program ? title(program.properties["Program"]) : "",
       programBlocks,
       macros,
       mealBlocks,
