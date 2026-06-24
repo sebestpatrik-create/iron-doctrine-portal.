@@ -105,3 +105,22 @@ footer small{display:block;margin-top:9px;color:var(--cream-dim);font-size:.78re
 
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 :focus-visible{outline:2px solid var(--gold-bright);outline-offset:3px}
+
+/* AUTH PAGES */
+.auth-wrap{min-height:100vh;display:grid;place-items:center;padding:40px 22px;position:relative}
+.auth-card{width:100%;max-width:430px;border:1px solid var(--line);border-radius:6px;background:linear-gradient(160deg,var(--iron-2),var(--iron));padding:44px 36px;position:relative;z-index:2}
+.auth-logo{font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.06em;font-size:1.5rem;text-align:center;margin-bottom:8px}
+.auth-logo b{color:var(--gold);font-weight:400}
+.auth-eyebrow{text-align:center;margin-bottom:28px}
+.auth-title{font-family:'Anton',sans-serif;text-transform:uppercase;font-size:1.9rem;line-height:1.05;text-align:center;margin-bottom:12px}
+.auth-sub{color:var(--cream-dim);text-align:center;font-size:1rem;margin-bottom:26px;line-height:1.55}
+.auth-form{display:flex;flex-direction:column;gap:14px}
+.auth-input{font-family:'Spectral',serif;font-size:1rem;padding:14px 16px;border-radius:3px;border:1px solid var(--line);background:var(--iron-3);color:var(--cream);width:100%}
+.auth-input::placeholder{color:var(--cream-dim);opacity:.6}
+.auth-input:focus{outline:none;border-color:var(--gold)}
+.auth-btn{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.13em;font-size:.82rem;padding:14px 26px;border-radius:2px;cursor:pointer;border:1px solid var(--gold);background:var(--gold);color:var(--iron);transition:background .2s,transform .15s}
+.auth-btn:hover{background:var(--gold-bright);transform:translateY(-1px)}
+.auth-btn:disabled{opacity:.55;cursor:default;transform:none}
+.auth-note{color:var(--cream-dim);font-size:.84rem;text-align:center;margin-top:20px;line-height:1.55}
+.auth-error{color:#E89B86;font-size:.9rem;text-align:center;background:rgba(154,61,42,.18);border:1px solid rgba(154,61,42,.45);border-radius:3px;padding:10px 12px}
+.auth-success .big{font-family:'Anton',sans-serif;font-size:1.5rem;color:var(--gold);margin-bottom:12px;text-transform:uppercase;text-align:center}
