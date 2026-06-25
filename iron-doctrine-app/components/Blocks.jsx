@@ -1,17 +1,18 @@
 function Table({ b }) {
+  const header = b.header || [];
   return (
     <div className="workout">
-      <table>
-        {b.header && (
+      <table className="rtable">
+        {header.length > 0 && (
           <thead>
-            <tr>{b.header.map((h, i) => <th key={i} className={i === 0 ? "" : "r"}>{h}</th>)}</tr>
+            <tr>{header.map((h, i) => <th key={i} className={i === 0 ? "" : "r"}>{h}</th>)}</tr>
           </thead>
         )}
         <tbody>
           {b.rows.map((row, ri) => (
             <tr key={ri}>
               {row.map((cell, ci) => (
-                <td key={ci} className={ci === 0 ? "ex" : "num r"}>{cell}</td>
+                <td key={ci} className={ci === 0 ? "ex" : "num r"} data-label={header[ci] || ""}>{cell}</td>
               ))}
             </tr>
           ))}

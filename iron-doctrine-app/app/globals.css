@@ -126,3 +126,19 @@ footer small{display:block;margin-top:9px;color:var(--cream-dim);font-size:.78re
 .auth-success .big{font-family:'Anton',sans-serif;font-size:1.5rem;color:var(--gold);margin-bottom:12px;text-transform:uppercase;text-align:center}
 .nav-signout{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.16em;font-size:.6rem;color:var(--cream-dim);background:transparent;border:1px solid var(--line);border-radius:2px;padding:7px 11px;cursor:pointer;transition:color .2s,border-color .2s}
 .nav-signout:hover{color:var(--gold);border-color:var(--gold)}
+
+/* RESPONSIVE TABLES — wide tables scroll on desktop, stack into cards on phones */
+.workout{overflow-x:auto}
+@media (max-width:640px){
+  .workout{border:none;background:none;overflow:visible}
+  .workout table.rtable thead{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+  .workout table.rtable,.workout table.rtable tbody{display:block;width:100%}
+  .workout table.rtable tr{display:block;border:1px solid var(--line);border-radius:6px;margin:0 0 12px;background:linear-gradient(160deg,rgba(199,154,59,.06),transparent)}
+  .workout table.rtable td{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:9px 16px;border-bottom:1px solid rgba(199,154,59,.10);font-size:.95rem}
+  .workout table.rtable tr td:last-child{border-bottom:none}
+  .workout table.rtable td::before{content:attr(data-label);font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:.6rem;color:var(--cream-dim);text-align:left;flex:0 0 auto;padding-top:2px}
+  .workout table.rtable td.ex{display:block;text-align:left;font-family:'Oswald',sans-serif;font-weight:700;font-size:1.02rem;color:var(--gold);background:rgba(199,154,59,.08);padding:11px 16px;border-bottom:1px solid var(--line)}
+  .workout table.rtable td.ex::before{display:none}
+  .workout table.rtable td.num{text-align:right;color:var(--cream)}
+  .workout table.rtable td:empty{display:none}
+}
