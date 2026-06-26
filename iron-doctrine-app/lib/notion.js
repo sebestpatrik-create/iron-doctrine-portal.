@@ -331,3 +331,50 @@ export async function getCheckins(clientId) {
     return [];
   }
 }
+
+// All clients, for the coach dashboard list.
+export async function getClients() {
+  if (!hasNotion) return [];
+  try {
+    const res = await notion.databases.query({ database_id: DB.clients, page_size: 100 });
+    return res.results.map((row) => {
+      const pr = row.properties;
+      return {
+        id: row.id,
+        name: title(pr["Name"]) || "(unnamed)",
+        status: sel(pr["Status"]) || "",
+        email: (pr["Email"] && pr["Email"].email) || "",
+        lang: normalizeLang(sel(pr["Language"])),
+        goal: sel(pr["Primary Goal"]) || "",
+      };
+    });
+  } catch (err) {
+    console.error("getClients failed:", err.message);
+    return [];
+  }
+}
+
+// Per-client latest check-in summary (date, weight, total count) for the list.
+export async function getLatestCheckins() {
+  if (!hasNotion) return {};
+  try {
+    const res = await notion.databases.query({
+      database_id: DB.weeklyCheckin,
+      sorts: [{ property: "Date", direction: "descending" }],
+      page_size: 100,
+    });
+    const map = {};
+    for (const row of res.results) {
+      const pr = row.properties;
+      const rel = pr["Client"] && pr["Client"].relation;
+      const cid = rel && rel[0] && rel[0].id;
+      if (!cid) continue;
+      if (!map[cid]) map[cid] = { date: dateStart(pr["Date"]) || "", weight: num(pr["Weight"]), count: 0 };
+      map[cid].count += 1;
+    }
+    return map;
+  } catch (err) {
+    console.error("getLatestCheckins failed:", err.message);
+    return {};
+  }
+}
