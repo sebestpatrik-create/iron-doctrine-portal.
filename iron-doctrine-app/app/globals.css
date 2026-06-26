@@ -246,3 +246,13 @@ footer small{display:block;margin-top:9px;color:var(--cream-dim);font-size:.78re
 .coach-ci-note,.coach-ci-fb{margin-top:10px;font-size:.9rem;line-height:1.5;color:var(--cream)}
 .coach-ci-note i,.coach-ci-fb i{display:block;font-family:'Oswald',sans-serif;font-style:normal;text-transform:uppercase;letter-spacing:.06em;font-size:.6rem;color:var(--cream-dim);margin-bottom:3px}
 .coach-ci-fb{border-left:2px solid var(--gold);padding-left:11px;color:var(--cream-dim)}
+
+/* COLLAPSIBLE ROLLOUT SECTIONS */
+.collapse{border-top:1px solid var(--line)}
+.collapse-head{width:100%;display:flex;align-items:center;justify-content:space-between;gap:18px;background:none;border:0;padding:24px 0;cursor:pointer;text-align:left;color:inherit;font:inherit}
+.collapse-titles{display:flex;flex-direction:column;gap:5px}
+.collapse-head .sec-title{margin:0}
+.collapse-chev{font-size:1.7rem;line-height:1;color:var(--gold);transition:transform .22s ease;flex:0 0 auto}
+.collapse.open .collapse-chev{transform:rotate(180deg)}
+.collapse-body{padding-bottom:34px}
+.collapse-body[hidden]{display:none}

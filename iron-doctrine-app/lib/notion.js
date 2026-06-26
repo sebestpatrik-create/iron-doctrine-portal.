@@ -192,7 +192,7 @@ export async function getPortalData(clientId) {
       activeFor(DB.meals, clientId),
       activeFor(DB.supplements, clientId),
       notion.databases.query({
-        database_id: DB.measurements,
+        database_id: DB.weeklyCheckin,
         filter: { property: "Client", relation: { contains: clientId } },
         sorts: [{ property: "Date", direction: "ascending" }],
         page_size: 100,
@@ -222,7 +222,7 @@ export async function getPortalData(clientId) {
     };
 
     const measurements = measRes.results
-      .map((m) => ({ date: dateStart(m.properties["Date"]), weight: num(m.properties["Weight (kg)"]) }))
+      .map((m) => ({ date: dateStart(m.properties["Date"]), weight: num(m.properties["Weight"]) }))
       .filter((m) => m.date && m.weight != null);
 
     return {
