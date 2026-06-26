@@ -12,6 +12,7 @@ const DB = {
   measurements: process.env.DB_MEASUREMENTS || "a2f9f4749fd3429186f5fff529701389",
   exLibrary: process.env.DB_EXLIBRARY || "d1501bd38d3d49cdab53143c3f17a676",
   progExercises: process.env.DB_PROGEXERCISES || "fb37946265404b3ba7af3defb07fb382",
+  weeklyCheckin: process.env.DB_WEEKLYCHECKIN || "509f1fabd76a459399327bfa13b67cb8",
 };
 
 export const hasNotion = !!process.env.NOTION_TOKEN;
@@ -244,4 +245,51 @@ export async function getPortalData(clientId) {
     console.error("Notion read failed, showing demo:", err.message);
     return { ...DEMO, demo: true, error: true };
   }
+}
+
+// Lightweight client metadata (name + language) without the full portal read.
+export async function getClientMeta(clientId) {
+  if (!hasNotion || !clientId) return { name: "", lang: "en" };
+  try {
+    const client = await notion.pages.retrieve({ page_id: clientId });
+    const cp = client.properties;
+    return {
+      name: title(cp["Name"]) || "",
+      lang: normalizeLang(sel(cp["Language"]) || sel(cp["Select"])),
+    };
+  } catch {
+    return { name: "", lang: "en" };
+  }
+}
+
+// Create a Weekly Check-in row for a client. Photo values are Supabase
+// Storage *paths* (not public URLs) — the images stay private in the bucket.
+export async function createCheckin({ clientId, date, weight, ratings, note, photos }) {
+  if (!hasNotion) throw new Error("Notion not configured");
+  const props = {
+    "Check-in": { title: [{ text: { content: date } }] },
+    Client: { relation: [{ id: clientId }] },
+    Date: { date: { start: date } },
+  };
+  if (weight != null && !Number.isNaN(weight)) props["Weight"] = { number: weight };
+  const ratingMap = {
+    Energy: ratings && ratings.energy,
+    Strength: ratings && ratings.strength,
+    Sleep: ratings && ratings.sleep,
+    Motivation: ratings && ratings.motivation,
+    Digestion: ratings && ratings.digestion,
+  };
+  for (const [k, v] of Object.entries(ratingMap)) {
+    if (typeof v === "number" && v >= 1 && v <= 5) props[k] = { number: v };
+  }
+  if (note) props["Client Note"] = { rich_text: [{ text: { content: note } }] };
+  if (photos && photos.front) props["Photo Front"] = { rich_text: [{ text: { content: photos.front } }] };
+  if (photos && photos.side) props["Photo Side"] = { rich_text: [{ text: { content: photos.side } }] };
+  if (photos && photos.back) props["Photo Back"] = { rich_text: [{ text: { content: photos.back } }] };
+
+  const res = await notion.pages.create({
+    parent: { database_id: DB.weeklyCheckin },
+    properties: props,
+  });
+  return res.id;
 }
