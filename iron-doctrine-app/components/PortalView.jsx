@@ -126,7 +126,7 @@ export default function PortalView({ d, lang, signOut }) {
           <div className="eyebrow">{t(lang, "weeklyCheckin")}</div>
           <h2 className="sec-title">{t(lang, "sendNumbers")}</h2>
           <p>{t(lang, "checkinBlurb")}</p>
-          <a href={checkinForm} className="btn btn-primary" target="_blank" rel="noopener">{t(lang, "submitCheckin")}</a>
+          <a href="/portal/check-in" className="btn btn-primary">{t(lang, "submitCheckin")}</a>
         </div>
       </section>
 
