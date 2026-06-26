@@ -1,11 +1,12 @@
 import Blocks from "./Blocks.jsx";
 import ProgramDays from "./ProgramDays.jsx";
+import ProgressGallery from "./ProgressGallery.jsx";
 import Chart from "./Chart.jsx";
 import { t, translateGoal } from "../lib/i18n.js";
 
 // The full member portal UI. Used by both the logged-in /portal route and the
 // /c/[id] preview link, so they never drift apart.
-export default function PortalView({ d, lang, signOut }) {
+export default function PortalView({ d, lang, signOut, progress }) {
   const initials = (d.name || "?")
     .split(" ")
     .map((w) => w[0])
@@ -117,6 +118,14 @@ export default function PortalView({ d, lang, signOut }) {
             <div className="supps">
               {d.supplements.map((s, i) => <div key={i} className="supp">{s}</div>)}
             </div>
+          </div>
+        </section>
+      )}
+
+      {progress && progress.length > 0 && (
+        <section id="progress">
+          <div className="wrap">
+            <ProgressGallery progress={progress} lang={lang} />
           </div>
         </section>
       )}

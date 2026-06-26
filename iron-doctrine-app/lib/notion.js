@@ -293,3 +293,41 @@ export async function createCheckin({ clientId, date, weight, ratings, note, pho
   });
   return res.id;
 }
+
+// All check-ins for a client, oldest → newest. Photo fields hold Storage
+// paths; the caller mints signed URLs (the bucket is private).
+export async function getCheckins(clientId) {
+  if (!hasNotion || !clientId) return [];
+  try {
+    const res = await notion.databases.query({
+      database_id: DB.weeklyCheckin,
+      filter: { property: "Client", relation: { contains: clientId } },
+      sorts: [{ property: "Date", direction: "ascending" }],
+      page_size: 100,
+    });
+    return res.results.map((row) => {
+      const pr = row.properties;
+      return {
+        date: dateStart(pr["Date"]) || "",
+        weight: num(pr["Weight"]),
+        ratings: {
+          energy: num(pr["Energy"]),
+          strength: num(pr["Strength"]),
+          sleep: num(pr["Sleep"]),
+          motivation: num(pr["Motivation"]),
+          digestion: num(pr["Digestion"]),
+        },
+        note: rt(pr["Client Note"] && pr["Client Note"].rich_text),
+        feedback: rt(pr["Coach Feedback"] && pr["Coach Feedback"].rich_text),
+        photos: {
+          front: rt(pr["Photo Front"] && pr["Photo Front"].rich_text),
+          side: rt(pr["Photo Side"] && pr["Photo Side"].rich_text),
+          back: rt(pr["Photo Back"] && pr["Photo Back"].rich_text),
+        },
+      };
+    });
+  } catch (err) {
+    console.error("getCheckins failed:", err.message);
+    return [];
+  }
+}

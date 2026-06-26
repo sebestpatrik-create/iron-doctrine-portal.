@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "../../lib/supabase/server.js";
-import { getPortalData, findClientByEmail } from "../../lib/notion.js";
+import { getPortalData, findClientByEmail, getCheckins } from "../../lib/notion.js";
 import PortalView from "../../components/PortalView.jsx";
 
 export const dynamic = "force-dynamic";
@@ -53,5 +53,29 @@ export default async function PortalPage({ searchParams }) {
   const override = searchParams?.lang;
   const lang = override === "cz" || override === "en" ? override : d.lang || "en";
 
-  return <PortalView d={d} lang={lang} signOut={true} />;
+  // Build the progress gallery: read check-ins, then mint short-lived signed
+  // URLs for the photos (private bucket — the user can only sign their own).
+  const checkins = await getCheckins(clientId);
+  const paths = [];
+  for (const ci of checkins) {
+    for (const v of ["front", "side", "back"]) if (ci.photos[v]) paths.push(ci.photos[v]);
+  }
+  const signedMap = {};
+  if (paths.length) {
+    const { data: signed } = await supabase.storage
+      .from("checkins")
+      .createSignedUrls(paths, 3600);
+    if (signed) for (const s of signed) if (s.signedUrl) signedMap[s.path] = s.signedUrl;
+  }
+  const progress = checkins
+    .map((ci) => ({
+      date: ci.date,
+      weight: ci.weight,
+      front: ci.photos.front ? signedMap[ci.photos.front] || null : null,
+      side: ci.photos.side ? signedMap[ci.photos.side] || null : null,
+      back: ci.photos.back ? signedMap[ci.photos.back] || null : null,
+    }))
+    .filter((p) => p.front || p.side || p.back);
+
+  return <PortalView d={d} lang={lang} progress={progress} signOut={true} />;
 }
