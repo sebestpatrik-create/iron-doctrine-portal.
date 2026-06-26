@@ -1,4 +1,5 @@
 import Blocks from "./Blocks.jsx";
+import ProgramDays from "./ProgramDays.jsx";
 import Chart from "./Chart.jsx";
 import { t, translateGoal } from "../lib/i18n.js";
 
@@ -66,7 +67,11 @@ export default function PortalView({ d, lang, signOut }) {
           <div className="sec-head">
             <div><div className="eyebrow">{t(lang, "program")}</div><h2 className="sec-title">{d.programName}</h2></div>
           </div>
-          <Blocks blocks={d.programBlocks} emptyText={t(lang, "programEmpty")} />
+          {d.programDays && d.programDays.length > 0 ? (
+            <ProgramDays days={d.programDays} lang={lang} />
+          ) : (
+            <Blocks blocks={d.programBlocks} emptyText={t(lang, "programEmpty")} />
+          )}
         </div>
       </section>
 
