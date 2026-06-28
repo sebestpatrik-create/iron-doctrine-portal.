@@ -1,13 +1,11 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState } from "react";
 
 const DICT = {
   en: { title: "Progress", front: "Front", side: "Side", back: "Back", from: "From", to: "To",
-    noPhotos: "No progress photos yet — submit a check-in with photos to start your timeline.",
-    drag: "Drag the handle to compare" },
+    noPhotos: "No progress photos yet — submit a check-in with photos to start your timeline." },
   cz: { title: "Pokrok", front: "Zepředu", side: "Z boku", back: "Zezadu", from: "Od", to: "Do",
-    noPhotos: "Zatím žádné fotky — pošli check-in s fotkami a založ si svou časovou osu.",
-    drag: "Táhni úchopem pro porovnání" },
+    noPhotos: "Zatím žádné fotky — pošli check-in s fotkami a založ si svou časovou osu." },
 };
 
 function fmtDate(d, lang) {
@@ -21,9 +19,6 @@ function fmtDate(d, lang) {
 export default function ProgressGallery({ progress, lang }) {
   const T = DICT[lang === "cz" ? "cz" : "en"];
   const items = progress || [];
-  const ref = useRef(null);
-  const dragging = useRef(false);
-  const [pos, setPos] = useState(50);
 
   const angles = ["front", "side", "back"].filter((a) => items.some((it) => it[a]));
   const [angle, setAngle] = useState(angles[0] || "front");
@@ -46,17 +41,6 @@ export default function ProgressGallery({ progress, lang }) {
   const A = dated[ai];
   const B = dated[bi];
   const canCompare = dated.length >= 2 && A && B && A[angle] && B[angle];
-
-  const move = (e) => {
-    const rect = ref.current && ref.current.getBoundingClientRect();
-    if (!rect) return;
-    let x = ((e.clientX - rect.left) / rect.width) * 100;
-    setPos(Math.max(0, Math.min(100, x)));
-  };
-  const onDown = (e) => { dragging.current = true; if (e.currentTarget.setPointerCapture) e.currentTarget.setPointerCapture(e.pointerId); move(e); };
-  const onMove = (e) => { if (dragging.current) move(e); };
-  const onUp = () => { dragging.current = false; };
-
   const last = items[items.length - 1];
   const weightDelta = A && B && A.weight != null && B.weight != null ? B.weight - A.weight : null;
 
@@ -89,14 +73,15 @@ export default function ProgressGallery({ progress, lang }) {
             </label>
           </div>
 
-          <div className="cmp" ref={ref} onPointerDown={onDown} onPointerMove={onMove}
-            onPointerUp={onUp} onPointerLeave={onUp} onPointerCancel={onUp}>
-            <img className="cmp-img" src={B[angle]} alt={fmtDate(B.date, lang)} draggable={false} />
-            <img className="cmp-img cmp-top" src={A[angle]} alt={fmtDate(A.date, lang)} draggable={false}
-              style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }} />
-            <div className="cmp-divider" style={{ left: `${pos}%` }}><span className="cmp-handle">⟺</span></div>
-            <span className="cmp-tag cmp-l">{fmtDate(A.date, lang)}</span>
-            <span className="cmp-tag cmp-r">{fmtDate(B.date, lang)}</span>
+          <div className="prog-compare">
+            <figure className="prog-pane">
+              <img src={A[angle]} alt={fmtDate(A.date, lang)} />
+              <figcaption>{fmtDate(A.date, lang)}{A.weight != null ? ` \u00b7 ${A.weight} kg` : ""}</figcaption>
+            </figure>
+            <figure className="prog-pane">
+              <img src={B[angle]} alt={fmtDate(B.date, lang)} />
+              <figcaption>{fmtDate(B.date, lang)}{B.weight != null ? ` \u00b7 ${B.weight} kg` : ""}</figcaption>
+            </figure>
           </div>
 
           {weightDelta != null && (
@@ -105,7 +90,6 @@ export default function ProgressGallery({ progress, lang }) {
               <span className="prog-delta">{weightDelta >= 0 ? "+" : ""}{weightDelta.toFixed(1)} kg</span>
             </div>
           )}
-          <p className="prog-hint">{T.drag}</p>
         </>
       ) : (
         <div className="prog-single">

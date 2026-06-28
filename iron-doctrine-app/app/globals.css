@@ -256,3 +256,9 @@ footer small{display:block;margin-top:9px;color:var(--cream-dim);font-size:.78re
 .collapse.open .collapse-chev{transform:rotate(180deg)}
 .collapse-body{padding-bottom:34px}
 .collapse-body[hidden]{display:none}
+
+/* PROGRESS — side-by-side comparison (replaces slider) */
+.prog-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:540px}
+.prog-pane{margin:0}
+.prog-pane img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:block}
+.prog-pane figcaption{margin-top:8px;text-align:center;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.04em;font-size:.72rem;color:var(--cream-dim)}
