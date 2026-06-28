@@ -3,6 +3,7 @@ import { createClient } from "../../../lib/supabase/server.js";
 import { getClientMeta, getCheckins } from "../../../lib/notion.js";
 import Chart from "../../../components/Chart.jsx";
 import ProgressGallery from "../../../components/ProgressGallery.jsx";
+import CoachFeedback from "../../../components/CoachFeedback.jsx";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,8 @@ const RATINGS = [
 ];
 
 export default async function CoachClient({ params }) {
+  // Robust to the dynamic segment's name: use clientId, else the first route param.
+  const clientId = (params && (params.clientId || Object.values(params)[0])) || "";
   const supabase = createClient();
   const {
     data: { user },
@@ -36,8 +39,8 @@ export default async function CoachClient({ params }) {
   if (!user) redirect("/login");
   if (!ADMINS.includes((user.email || "").toLowerCase())) redirect("/portal");
 
-  const { name } = await getClientMeta(params.clientId);
-  const checkins = await getCheckins(params.clientId); // oldest → newest
+  const { name } = await getClientMeta(clientId);
+  const checkins = await getCheckins(clientId); // oldest → newest
 
   // Sign all photos (coach session — needs the coach read policy on the bucket).
   const paths = [];
@@ -115,7 +118,7 @@ export default async function CoachClient({ params }) {
                       </div>
                     )}
                     {ci.note && <div className="coach-ci-note"><i>Client note</i>{ci.note}</div>}
-                    {ci.feedback && <div className="coach-ci-fb"><i>Your feedback</i>{ci.feedback}</div>}
+                    <CoachFeedback checkinId={ci.id} initial={ci.feedback} />
                   </div>
                 );
               })}

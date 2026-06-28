@@ -308,6 +308,7 @@ export async function getCheckins(clientId) {
     return res.results.map((row) => {
       const pr = row.properties;
       return {
+        id: row.id,
         date: dateStart(pr["Date"]) || "",
         weight: num(pr["Weight"]),
         ratings: {
@@ -377,4 +378,15 @@ export async function getLatestCheckins() {
     console.error("getLatestCheckins failed:", err.message);
     return {};
   }
+}
+
+// Write coach feedback onto a specific check-in row.
+export async function setCheckinFeedback(checkinId, feedback) {
+  if (!hasNotion) throw new Error("Notion not configured");
+  await notion.pages.update({
+    page_id: checkinId,
+    properties: {
+      "Coach Feedback": { rich_text: feedback ? [{ text: { content: feedback } }] : [] },
+    },
+  });
 }

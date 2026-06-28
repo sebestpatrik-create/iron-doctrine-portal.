@@ -77,5 +77,9 @@ export default async function PortalPage({ searchParams }) {
     }))
     .filter((p) => p.front || p.side || p.back);
 
-  return <PortalView d={d} lang={lang} progress={progress} signOut={true} />;
+  // Most recent check-in that has coach feedback → shown on the portal.
+  const fb = [...checkins].reverse().find((c) => c.feedback);
+  const coachNote = fb ? { text: fb.feedback, date: fb.date } : null;
+
+  return <PortalView d={d} lang={lang} progress={progress} coachNote={coachNote} signOut={true} />;
 }

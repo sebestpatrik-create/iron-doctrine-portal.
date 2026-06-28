@@ -7,7 +7,7 @@ import { t, translateGoal } from "../lib/i18n.js";
 
 // The full member portal UI. Used by both the logged-in /portal route and the
 // /c/[id] preview link, so they never drift apart.
-export default function PortalView({ d, lang, signOut, progress }) {
+export default function PortalView({ d, lang, signOut, progress, coachNote }) {
   const initials = (d.name || "?")
     .split(" ")
     .map((w) => w[0])
@@ -63,6 +63,23 @@ export default function PortalView({ d, lang, signOut, progress }) {
           </div>
         </div>
       </header>
+
+      {coachNote && coachNote.text && (
+        <section id="coach-note">
+          <div className="wrap">
+            <div className="coachnote">
+              <div className="eyebrow">{lang === "cz" ? "Zpráva od trenéra" : "Message from your coach"}</div>
+              <p className="coachnote-text">{coachNote.text}</p>
+              {coachNote.date && (
+                <div className="coachnote-date">
+                  {lang === "cz" ? "k check-inu " : "re: check-in "}
+                  {(() => { try { return new Date(coachNote.date).toLocaleDateString(lang === "cz" ? "cs-CZ" : "en-GB", { day: "numeric", month: "short", year: "numeric" }); } catch { return coachNote.date; } })()}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section id="program">
         <div className="wrap">
