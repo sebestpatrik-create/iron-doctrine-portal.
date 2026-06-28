@@ -50,6 +50,10 @@ export default async function PortalPage({ searchParams }) {
   }
 
   const d = await getPortalData(clientId);
+
+  // GDPR gate: no consent on record → must consent before using the portal.
+  if (!d.demo && !d.consentGiven) redirect("/portal/consent");
+
   const override = searchParams?.lang;
   const lang = override === "cz" || override === "en" ? override : d.lang || "en";
 

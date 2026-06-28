@@ -229,6 +229,7 @@ export async function getPortalData(clientId) {
       name,
       goal,
       lang,
+      consentGiven: cp["Consent Given"]?.checkbox === true,
       weekLabel: program ? title(program.properties["Program"]) : "",
       todayNote: null,
       programName: program ? title(program.properties["Program"]) : "",
@@ -256,6 +257,7 @@ export async function getClientMeta(clientId) {
     return {
       name: title(cp["Name"]) || "",
       lang: normalizeLang(sel(cp["Language"]) || sel(cp["Select"])),
+      consentGiven: cp["Consent Given"]?.checkbox === true,
     };
   } catch {
     return { name: "", lang: "en" };
@@ -387,6 +389,20 @@ export async function setCheckinFeedback(checkinId, feedback) {
     page_id: checkinId,
     properties: {
       "Coach Feedback": { rich_text: feedback ? [{ text: { content: feedback } }] : [] },
+    },
+  });
+}
+
+// Record (or reaffirm) a client's GDPR consent for processing health data.
+export async function setClientConsent(clientId, version) {
+  if (!hasNotion || !clientId) return;
+  const today = new Date().toISOString().slice(0, 10);
+  await notion.pages.update({
+    page_id: clientId,
+    properties: {
+      "Consent Given": { checkbox: true },
+      "Consent Date": { date: { start: today } },
+      "Policy Version": version ? { rich_text: [{ text: { content: version } }] } : { rich_text: [] },
     },
   });
 }

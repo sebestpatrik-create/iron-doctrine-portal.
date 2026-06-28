@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "../../../lib/supabase/server.js";
-import { findClientByEmail, createCheckin } from "../../../lib/notion.js";
+import { findClientByEmail, createCheckin, setClientConsent } from "../../../lib/notion.js";
+import { POLICY_VERSION } from "../../../lib/legal.js";
 
 // Receives a check-in submission. Photos are already uploaded to the client's
 // own Storage folder (RLS-enforced); this only stores the metadata + paths in
@@ -55,6 +56,10 @@ export async function POST(request) {
       note: typeof note === "string" ? note.slice(0, 2000) : "",
       photos: safePhotos,
     });
+    // Photos are health data — reaffirm consent timestamp on each photo upload.
+    if (safePhotos.front || safePhotos.side || safePhotos.back) {
+      try { await setClientConsent(clientId, POLICY_VERSION); } catch (e) { console.error("consent restamp:", e.message); }
+    }
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("check-in save failed:", err.message);

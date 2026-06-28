@@ -11,6 +11,8 @@ const DICT = {
     submit: "Submit check-in", submitting: "Submitting…",
     done: "Check-in submitted", doneSub: "Nice work — see you next week.", back2: "Back to portal",
     weightReq: "Please enter your weight.", err: "Something went wrong. Please try again.",
+    consent: "I consent to uploading and processing these progress photos (health data) for coaching.",
+    consentReq: "Please confirm consent to upload your photos.",
   },
   cz: {
     weight: "Váha (kg)", ratings: "Jaký byl tvůj týden?",
@@ -20,6 +22,8 @@ const DICT = {
     submit: "Odeslat check-in", submitting: "Odesílám…",
     done: "Check-in odeslán", doneSub: "Dobrá práce — uvidíme se příští týden.", back2: "Zpět na portál",
     weightReq: "Zadej prosím svoji váhu.", err: "Něco se pokazilo. Zkus to prosím znovu.",
+    consent: "Souhlasím s nahráním a zpracováním těchto fotografií progresu (údaje o zdraví) pro účely coachingu.",
+    consentReq: "Pro nahrání fotek prosím potvrď souhlas.",
   },
 };
 
@@ -45,6 +49,7 @@ export default function CheckInForm({ userId, lang }) {
   const [ratings, setRatings] = useState({});
   const [note, setNote] = useState("");
   const [photos, setPhotos] = useState({ front: null, side: null, back: null });
+  const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState("idle");
   const [errMsg, setErrMsg] = useState("");
 
@@ -54,6 +59,8 @@ export default function CheckInForm({ userId, lang }) {
   async function submit() {
     setErrMsg("");
     if (!weight) { setErrMsg(T.weightReq); return; }
+    const hasPhotos = VIEWS.some((v) => photos[v]);
+    if (hasPhotos && !consent) { setErrMsg(T.consentReq); return; }
     setStatus("submitting");
     try {
       const supabase = createClient();
@@ -134,6 +141,16 @@ export default function CheckInForm({ userId, lang }) {
             </label>
           ))}
         </div>
+        {VIEWS.some((v) => photos[v]) && (
+          <label className="ci-consent">
+            <input
+              type="checkbox"
+              checked={consent}
+              onChange={(e) => { setConsent(e.target.checked); if (e.target.checked) setErrMsg(""); }}
+            />
+            <span>{T.consent}</span>
+          </label>
+        )}
       </div>
 
       <label className="ci-field">

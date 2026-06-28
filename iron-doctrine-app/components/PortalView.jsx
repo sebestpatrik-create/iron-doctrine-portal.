@@ -186,6 +186,7 @@ export default function PortalView({ d, lang, signOut, progress, coachNotes }) {
         <div className="wrap">
           <div className="fmark">Iron <b>Doctrine</b></div>
           <small>{t(lang, "coachedBy")}</small>
+          <a href={`/privacy?lang=${lang === "cz" ? "cs" : "en"}`} className="footer-privacy">{t(lang, "privacyLink")}</a>
         </div>
       </footer>
     </>
