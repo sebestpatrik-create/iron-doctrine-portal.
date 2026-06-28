@@ -406,3 +406,33 @@ export async function setClientConsent(clientId, version) {
     },
   });
 }
+
+// Read a client's name + email (for erasure: name confirms, email finds the auth user).
+export async function getClientContact(clientId) {
+  if (!hasNotion || !clientId) throw new Error("Notion not configured");
+  const client = await notion.pages.retrieve({ page_id: clientId });
+  const cp = client.properties;
+  return { name: title(cp["Name"]) || "", email: cp["Email"]?.email || "" };
+}
+
+// Right to erasure: archive all the client's check-in rows, then the client row.
+export async function archiveClientAndCheckins(clientId) {
+  if (!hasNotion || !clientId) throw new Error("Notion not configured");
+  let count = 0;
+  let cursor = undefined;
+  do {
+    const res = await notion.databases.query({
+      database_id: DB.weeklyCheckin,
+      filter: { property: "Client", relation: { contains: clientId } },
+      page_size: 100,
+      start_cursor: cursor,
+    });
+    for (const row of res.results) {
+      await notion.pages.update({ page_id: row.id, archived: true });
+      count++;
+    }
+    cursor = res.has_more ? res.next_cursor : undefined;
+  } while (cursor);
+  await notion.pages.update({ page_id: clientId, archived: true });
+  return count;
+}

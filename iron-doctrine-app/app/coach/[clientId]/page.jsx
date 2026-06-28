@@ -4,6 +4,7 @@ import { getClientMeta, getCheckins } from "../../../lib/notion.js";
 import Chart from "../../../components/Chart.jsx";
 import ProgressGallery from "../../../components/ProgressGallery.jsx";
 import CoachFeedback from "../../../components/CoachFeedback.jsx";
+import DeleteClient from "../../../components/DeleteClient.jsx";
 
 export const dynamic = "force-dynamic";
 
@@ -126,6 +127,8 @@ export default async function CoachClient({ params }) {
           </div>
         </div>
       </section>
+
+      <DeleteClient clientId={clientId} name={name} />
     </main>
   );
 }
