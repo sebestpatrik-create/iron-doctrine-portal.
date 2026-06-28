@@ -7,7 +7,7 @@ import { t, translateGoal } from "../lib/i18n.js";
 
 // The full member portal UI. Used by both the logged-in /portal route and the
 // /c/[id] preview link, so they never drift apart.
-export default function PortalView({ d, lang, signOut, progress, coachNote }) {
+export default function PortalView({ d, lang, signOut, progress, coachNotes }) {
   const initials = (d.name || "?")
     .split(" ")
     .map((w) => w[0])
@@ -17,6 +17,19 @@ export default function PortalView({ d, lang, signOut, progress, coachNote }) {
 
   const sessionForm = process.env.FORM_SESSION || "#";
   const checkinForm = process.env.FORM_CHECKIN || "#";
+
+  const fmtCheckin = (ds) => {
+    try {
+      return new Date(ds).toLocaleDateString(lang === "cz" ? "cs-CZ" : "en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+    } catch {
+      return ds;
+    }
+  };
+  const notes = Array.isArray(coachNotes) ? coachNotes.filter((n) => n && n.text) : [];
 
   const start = d.measurements && d.measurements.length ? d.measurements[0].weight : null;
   const latest = d.measurements && d.measurements.length ? d.measurements[d.measurements.length - 1].weight : null;
@@ -64,19 +77,40 @@ export default function PortalView({ d, lang, signOut, progress, coachNote }) {
         </div>
       </header>
 
-      {coachNote && coachNote.text && (
+      {notes.length > 0 && (
         <section id="coach-note">
           <div className="wrap">
             <div className="coachnote">
               <div className="eyebrow">{lang === "cz" ? "Zpráva od trenéra" : "Message from your coach"}</div>
-              <p className="coachnote-text">{coachNote.text}</p>
-              {coachNote.date && (
+              <p className="coachnote-text">{notes[0].text}</p>
+              {notes[0].date && (
                 <div className="coachnote-date">
                   {lang === "cz" ? "k check-inu " : "re: check-in "}
-                  {(() => { try { return new Date(coachNote.date).toLocaleDateString(lang === "cz" ? "cs-CZ" : "en-GB", { day: "numeric", month: "short", year: "numeric" }); } catch { return coachNote.date; } })()}
+                  {fmtCheckin(notes[0].date)}
                 </div>
               )}
             </div>
+
+            {notes.length > 1 && (
+              <div className="coachnote-prev">
+                <Collapsible
+                  eyebrow={lang === "cz" ? "Archiv" : "Archive"}
+                  title={lang === "cz" ? `Předchozí zprávy (${notes.length - 1})` : `Previous messages (${notes.length - 1})`}
+                >
+                  {notes.slice(1).map((n, i) => (
+                    <div className="coachnote coachnote-old" key={i}>
+                      <p className="coachnote-text">{n.text}</p>
+                      {n.date && (
+                        <div className="coachnote-date">
+                          {lang === "cz" ? "k check-inu " : "re: check-in "}
+                          {fmtCheckin(n.date)}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </Collapsible>
+              </div>
+            )}
           </div>
         </section>
       )}

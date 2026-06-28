@@ -277,3 +277,9 @@ footer small{display:block;margin-top:9px;color:var(--cream-dim);font-size:.78re
 .coachnote{background:var(--iron-2);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:10px;padding:18px 20px}
 .coachnote-text{color:var(--cream);font-family:Spectral,Georgia,serif;font-size:1.05rem;line-height:1.6;margin:8px 0 0;white-space:pre-wrap}
 .coachnote-date{margin-top:10px;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.05em;font-size:.64rem;color:var(--cream-dim)}
+
+/* COACH NOTE — previous messages archive */
+.coachnote-prev{margin-top:14px}
+.coachnote-old{background:var(--iron);border-left-color:var(--bronze);margin-bottom:10px}
+.coachnote-old:last-child{margin-bottom:0}
+.coachnote-old .coachnote-text{font-size:.98rem;color:var(--cream-dim)}
