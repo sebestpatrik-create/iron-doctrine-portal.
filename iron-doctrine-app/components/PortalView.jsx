@@ -39,7 +39,10 @@ export default function PortalView({ d, lang, signOut, progress, coachNotes }) {
       {d.demo && <div className="demo-flag">{t(lang, "demoFlag")}</div>}
 
       <nav>
-        <a href="/" className="brand">Iron <b>Doctrine</b></a>
+        <a href="/" className="brand">
+          <img src="/mark.png" alt="" className="brand-mark" aria-hidden="true" />
+          <span>Iron <b>Doctrine</b></span>
+        </a>
         <div className="member">
           <span className="label">{t(lang, "member")}</span>
           <div className="avatar">{initials}</div>
@@ -52,20 +55,7 @@ export default function PortalView({ d, lang, signOut, progress, coachNotes }) {
       </nav>
 
       <header className="hero">
-        <svg className="sunburst" viewBox="0 0 100 100" aria-hidden="true">
-          <g stroke="#C79A3B" fill="none">
-            {Array.from({ length: 44 }).map((_, i) => {
-              const a = (i / 44) * Math.PI * 2;
-              return (
-                <line key={i}
-                  x1={(50 + Math.cos(a) * 20).toFixed(2)} y1={(50 + Math.sin(a) * 20).toFixed(2)}
-                  x2={(50 + Math.cos(a) * 66).toFixed(2)} y2={(50 + Math.sin(a) * 66).toFixed(2)}
-                  strokeWidth={i % 2 ? 0.25 : 0.5} />
-              );
-            })}
-          </g>
-          <circle cx="50" cy="50" r="19" stroke="#C79A3B" strokeWidth=".5" fill="none" opacity=".6" />
-        </svg>
+        <img src="/badge.png" alt="" className="hero-badge" aria-hidden="true" />
         <div className="wrap hero-inner">
           {d.weekLabel && <div className="hero-eyebrow eyebrow">{d.weekLabel}</div>}
           <h1 className="greet">{t(lang, "welcomeBack")}<br /><b>{d.name}</b></h1>
