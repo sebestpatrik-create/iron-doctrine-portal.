@@ -10,7 +10,8 @@ body{background:var(--iron);color:var(--cream);font-family:'Spectral',Georgia,se
 body::after{content:"";position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.05;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 ::selection{background:var(--gold);color:var(--iron)}
 a{color:inherit;text-decoration:none}
-.eyebrow{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.32em;font-size:.7rem;font-weight:600;color:var(--gold)}
+.eyebrow{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.32em;font-size:.7rem;font-weight:600;color:var(--gold);display:inline-flex;align-items:center;gap:9px}
+.eyebrow::before{content:"";width:16px;height:1px;background:var(--gold);flex:0 0 auto}
 .wrap{max-width:1080px;margin:0 auto;padding:0 26px}
 .muted{color:var(--cream-dim);font-style:italic}
 
@@ -454,4 +455,23 @@ select.nc-input{appearance:none;cursor:pointer}
 @media(max-width:860px){
   .portal-grid{grid-template-columns:1fr}
   .portal{padding:30px 0 8px}
+}
+
+/* ============ COACH SURFACES — LEDGER PASS ============ */
+.btn-sm{padding:10px 16px;font-size:.7rem;letter-spacing:.1em}
+.coach-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.coach-head{margin-bottom:34px}
+.coach-title{margin-bottom:0}
+.coach-list{max-width:680px}
+.coach-card{border-radius:12px;padding:18px 20px}
+.coach-card-meta{margin-top:8px}
+.pa-edit-btn{white-space:nowrap;text-decoration:none}
+.coach-block{margin:26px 0;max-width:760px}
+.coach-block .eyebrow{margin-bottom:12px}
+@media(max-width:640px){
+  .coach-head{flex-direction:column;align-items:stretch;gap:18px}
+  .coach-actions{width:100%}
+  .coach-actions .btn{flex:1;justify-content:center}
+  .pa-controls{flex-wrap:wrap}
+  .pa-edit-btn{order:3}
 }

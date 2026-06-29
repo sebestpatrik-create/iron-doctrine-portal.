@@ -54,10 +54,10 @@ export default async function CoachHome() {
               <div className="eyebrow">Coach Dashboard</div>
               <h1 className="coach-title">Clients</h1>
             </div>
-            <a href="/coach/new" className="btn btn-primary coach-new">+ New client</a>
-          </div>
-          <div className="coach-subactions">
-            <a href="/coach/program/new" className="coach-newprog">+ Build a program</a>
+            <div className="coach-actions">
+              <a href="/coach/program/new" className="btn btn-ghost btn-sm">+ Build a program</a>
+              <a href="/coach/new" className="btn btn-primary btn-sm">+ New client</a>
+            </div>
           </div>
 
           <div className="coach-list">
