@@ -29,7 +29,7 @@ export default function Chart({ measurements, lang, emptyText }) {
   return (
     <svg className="chart-svg" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Bodyweight progress">
       {yTicks.map((v, i) => (
-        <g key={i} fontFamily="Oswald, sans-serif" fontSize="11" fill="#B8AC8E">
+        <g key={i} style={{fontFamily:"var(--font-oswald), sans-serif"}} fontSize="11" fill="#B8AC8E">
           <line x1={padL} y1={y(v)} x2={W - padR} y2={y(v)} stroke="rgba(199,154,59,.12)" />
           <text x={padL - 8} y={y(v) + 4} textAnchor="end">{v}</text>
         </g>
@@ -38,7 +38,7 @@ export default function Chart({ measurements, lang, emptyText }) {
       {pts.map((p, i) => (
         <circle key={i} cx={p[0]} cy={p[1]} r="5" fill="#E4BC58" stroke="#16130E" strokeWidth="2" />
       ))}
-      <g fontFamily="Oswald, sans-serif" fontSize="11" fill="#B8AC8E" textAnchor="middle">
+      <g style={{fontFamily:"var(--font-oswald), sans-serif"}} fontSize="11" fill="#B8AC8E" textAnchor="middle">
         <text x={x(0)} y={H - 12}>{fmt(data[0].date)}</text>
         {n > 1 && <text x={x(n - 1)} y={H - 12}>{fmt(data[n - 1].date)}</text>}
       </g>

@@ -1,4 +1,5 @@
 import { Client } from "@notionhq/client";
+import { unstable_cache } from "next/cache";
 import { DEMO } from "./demo.js";
 import { normalizeLang } from "./i18n.js";
 
@@ -100,8 +101,9 @@ export async function findClientByEmail(email) {
 
 // Load the whole Exercise Library once into a map: pageId -> exercise info.
 // Resolving relations in memory keeps the portal fast (no per-exercise fetch).
-async function loadExerciseLibrary() {
-  const map = new Map();
+// Raw paginated fetch → serializable array, so it can live in Next's data cache.
+async function fetchExerciseLibraryArray() {
+  const out = [];
   let cursor;
   do {
     const res = await notion.databases.query({
@@ -111,7 +113,8 @@ async function loadExerciseLibrary() {
     });
     for (const p of res.results) {
       const pr = p.properties;
-      map.set(p.id, {
+      out.push({
+        id: p.id,
         nameEN: title(pr["Name"]),
         nameCZ: rt(pr["Název CZ"] && pr["Název CZ"].rich_text),
         cueEN: rt(pr["Cue EN"] && pr["Cue EN"].rich_text),
@@ -121,6 +124,25 @@ async function loadExerciseLibrary() {
     }
     cursor = res.has_more ? res.next_cursor : undefined;
   } while (cursor);
+  return out;
+}
+
+// The exercise library was being re-downloaded on every portal and builder
+// load. It barely changes, so cache it in Next's data cache for an hour. The
+// page stays dynamic (fresh per user) — only this heavy read is cached.
+const getCachedExerciseLibrary = unstable_cache(
+  fetchExerciseLibraryArray,
+  ["exercise-library-v1"],
+  { revalidate: 3600, tags: ["exercise-library"] }
+);
+
+async function loadExerciseLibrary() {
+  if (!hasNotion) return new Map();
+  const arr = await getCachedExerciseLibrary();
+  const map = new Map();
+  for (const e of arr) {
+    map.set(e.id, { nameEN: e.nameEN, nameCZ: e.nameCZ, cueEN: e.cueEN, cueCZ: e.cueCZ, video: e.video });
+  }
   return map;
 }
 
@@ -682,3 +704,4 @@ export async function getProgramForEdit(programId) {
     return null;
   }
 }
+
