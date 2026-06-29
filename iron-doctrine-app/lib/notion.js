@@ -629,3 +629,56 @@ export async function saveProgram({ programId, title: progTitle, focus, daysPerW
 
   return pid;
 }
+
+// Load a program + its exercise rows back into the builder's shape (for editing).
+export async function getProgramForEdit(programId) {
+  if (!hasNotion || !programId) return null;
+  try {
+    const page = await notion.pages.retrieve({ page_id: programId });
+    const pp = page.properties;
+    const res = await notion.databases.query({
+      database_id: DB.progExercises,
+      filter: { property: "Program", relation: { contains: programId } },
+      sorts: [
+        { property: "Day", direction: "ascending" },
+        { property: "Order", direction: "ascending" },
+      ],
+      page_size: 100,
+    });
+    const daysMap = new Map();
+    for (const row of res.results) {
+      const pr = row.properties;
+      const dayNum = num(pr["Day"]) ?? 1;
+      const dayLabel = rt(pr["Day Label"] && pr["Day Label"].rich_text);
+      const ex = {
+        exerciseId: relIds(pr["Exercise"])[0] || "",
+        name: title(pr["Label"]),
+        sets: rt(pr["Sets"] && pr["Sets"].rich_text),
+        reps: rt(pr["Reps"] && pr["Reps"].rich_text),
+        rpe: rt(pr["RPE"] && pr["RPE"].rich_text),
+        tempo: rt(pr["Tempo"] && pr["Tempo"].rich_text),
+        load: rt(pr["Load"] && pr["Load"].rich_text),
+        rest: rt(pr["Rest"] && pr["Rest"].rich_text),
+        note: rt(pr["Note"] && pr["Note"].rich_text),
+      };
+      if (!daysMap.has(dayNum)) daysMap.set(dayNum, { label: dayLabel, exercises: [] });
+      const d = daysMap.get(dayNum);
+      if (dayLabel && !d.label) d.label = dayLabel;
+      d.exercises.push(ex);
+    }
+    const days = [...daysMap.entries()]
+      .sort((a, b) => a[0] - b[0])
+      .map(([, v]) => ({ label: v.label || "", exercises: v.exercises }));
+    return {
+      title: title(pp["Program"]),
+      focus: sel(pp["Focus"]) || "",
+      notes: rt(pp["Notes"] && pp["Notes"].rich_text),
+      clientId: relIds(pp["Client"])[0] || "",
+      active: sel(pp["Status"]) === "Active",
+      days: days.length ? days : [{ label: "", exercises: [] }],
+    };
+  } catch (err) {
+    console.error("getProgramForEdit failed:", err.message);
+    return null;
+  }
+}

@@ -55,6 +55,9 @@ function PlanRow({ clientId, type, label, plans, onDone }) {
         <span className="pa-label">{label}</span>
         <span className="pa-current">
           {current ? current.title : <span className="pa-none">None assigned</span>}
+          {type === "program" && current && (
+            <a href={`/coach/program/${current.id}/edit`} className="pa-edit">Edit</a>
+          )}
         </span>
       </div>
       <div className="pa-controls">

@@ -406,3 +406,7 @@ select.nc-input{appearance:none;cursor:pointer}
 .pb-add-day{background:transparent;border:1px dashed var(--gold);color:var(--gold);border-radius:9px;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:.72rem;padding:12px;cursor:pointer}
 .pb-err{color:var(--gold-bright);font-size:.9rem}
 .pb-actions{display:flex;justify-content:flex-end;align-items:center;gap:16px;margin-top:4px}
+
+/* PROGRAM EDIT LINK */
+.pa-edit{margin-left:10px;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:.6rem;color:var(--gold);text-decoration:none;border-bottom:1px solid var(--line)}
+.pa-edit:hover{color:var(--gold-bright)}
