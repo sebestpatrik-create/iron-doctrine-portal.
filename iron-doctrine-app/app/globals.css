@@ -515,3 +515,11 @@ select.nc-input{appearance:none;cursor:pointer}
   .coach-card-main{flex-wrap:wrap;gap:8px}
   .coach-card-tags{width:100%}
 }
+
+/* ============ INVITE BUTTON ============ */
+.coach-title-row{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:26px}
+.coach-title-row .coach-title{margin-bottom:0}
+.invite{display:inline-flex;align-items:center;gap:12px;flex-wrap:wrap}
+.invite-ok{font-family:var(--font-spectral),Georgia,serif;font-size:.86rem;color:var(--cream-dim)}
+.invite-err{font-family:var(--font-spectral),Georgia,serif;font-size:.86rem;color:var(--gold-bright)}
+.invite-noemail{font-family:var(--font-oswald),sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:.62rem;color:var(--bronze)}

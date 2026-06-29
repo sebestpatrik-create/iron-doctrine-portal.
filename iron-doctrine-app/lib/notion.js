@@ -278,6 +278,7 @@ export async function getClientMeta(clientId) {
     const cp = client.properties;
     return {
       name: title(cp["Name"]) || "",
+      email: cp["Email"]?.email || "",
       lang: normalizeLang(sel(cp["Language"]) || sel(cp["Select"])),
       consentGiven: cp["Consent Given"]?.checkbox === true,
     };

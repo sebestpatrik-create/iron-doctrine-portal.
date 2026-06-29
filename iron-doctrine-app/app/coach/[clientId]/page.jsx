@@ -5,6 +5,7 @@ import Chart from "../../../components/Chart.jsx";
 import ProgressGallery from "../../../components/ProgressGallery.jsx";
 import CheckinHistory from "../../../components/CheckinHistory.jsx";
 import DeleteClient from "../../../components/DeleteClient.jsx";
+import InviteButton from "../../../components/InviteButton.jsx";
 import PlanAssign from "../../../components/PlanAssign.jsx";
 
 export const dynamic = "force-dynamic";
@@ -41,7 +42,7 @@ export default async function CoachClient({ params }) {
   if (!user) redirect("/login");
   if (!ADMINS.includes((user.email || "").toLowerCase())) redirect("/portal");
 
-  const { name } = await getClientMeta(clientId);
+  const { name, email } = await getClientMeta(clientId);
   const checkins = await getCheckins(clientId); // oldest → newest
 
   const [progPlans, mealPlans, suppPlans] = await Promise.all([
@@ -96,7 +97,10 @@ export default async function CoachClient({ params }) {
       <section>
         <div className="wrap">
           <a href="/coach" className="coach-back">← All clients</a>
-          <h1 className="coach-title">{name || "Client"}</h1>
+          <div className="coach-title-row">
+            <h1 className="coach-title">{name || "Client"}</h1>
+            <InviteButton email={email} name={name} />
+          </div>
 
           <PlanAssign clientId={clientId} sections={planSections} />
           <a href={`/coach/program/new?client=${clientId}`} className="coach-newprog coach-newprog-inline">+ Build a program for {name || "this client"}</a>
