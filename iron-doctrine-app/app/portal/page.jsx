@@ -5,6 +5,11 @@ import PortalView from "../../components/PortalView.jsx";
 
 export const dynamic = "force-dynamic";
 
+const ADMINS = (process.env.ADMIN_EMAILS || "")
+  .split(",")
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
+
 export default async function PortalPage({ searchParams }) {
   const supabase = createClient();
   const {
@@ -18,6 +23,8 @@ export default async function PortalPage({ searchParams }) {
   const clientId = await findClientByEmail(user.email);
 
   if (!clientId) {
+    // Admin with no client account of their own → straight to the dashboard.
+    if (ADMINS.includes((user.email || "").toLowerCase())) redirect("/coach");
     // Authenticated, but no client registered under this email.
     return (
       <main className="auth-wrap">
@@ -87,5 +94,7 @@ export default async function PortalPage({ searchParams }) {
     .filter((c) => c.feedback)
     .map((c) => ({ text: c.feedback, date: c.date }));
 
-  return <PortalView d={d} lang={lang} progress={progress} coachNotes={coachNotes} signOut={true} />;
+  const isAdmin = ADMINS.includes((user.email || "").toLowerCase());
+
+  return <PortalView d={d} lang={lang} progress={progress} coachNotes={coachNotes} signOut={true} isAdmin={isAdmin} />;
 }
