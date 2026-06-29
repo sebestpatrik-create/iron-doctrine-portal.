@@ -3,7 +3,7 @@ import { createClient } from "../../../lib/supabase/server.js";
 import { getClientMeta, getCheckins, listPlans } from "../../../lib/notion.js";
 import Chart from "../../../components/Chart.jsx";
 import ProgressGallery from "../../../components/ProgressGallery.jsx";
-import CoachFeedback from "../../../components/CoachFeedback.jsx";
+import CheckinHistory from "../../../components/CheckinHistory.jsx";
 import DeleteClient from "../../../components/DeleteClient.jsx";
 import PlanAssign from "../../../components/PlanAssign.jsx";
 
@@ -114,31 +114,7 @@ export default async function CoachClient({ params }) {
 
           <div className="coach-block">
             <div className="eyebrow">Check-in history</div>
-            {history.length === 0 && <p className="muted">No check-ins yet.</p>}
-            <div className="coach-checkins">
-              {history.map((ci, i) => {
-                const ratings = RATINGS.map(([label, key]) => [label, ci.ratings[key]]).filter(
-                  ([, v]) => v != null
-                );
-                return (
-                  <div className="coach-ci" key={i}>
-                    <div className="coach-ci-head">
-                      <span className="coach-ci-date">{fmtDate(ci.date)}</span>
-                      {ci.weight != null && <span className="coach-ci-weight">{ci.weight} kg</span>}
-                    </div>
-                    {ratings.length > 0 && (
-                      <div className="coach-ratings">
-                        {ratings.map(([k, v], j) => (
-                          <span className="coach-rating" key={j}><i>{k}</i>{v}/5</span>
-                        ))}
-                      </div>
-                    )}
-                    {ci.note && <div className="coach-ci-note"><i>Client note</i>{ci.note}</div>}
-                    <CoachFeedback checkinId={ci.id} initial={ci.feedback} />
-                  </div>
-                );
-              })}
-            </div>
+            <CheckinHistory history={history} />
           </div>
         </div>
       </section>

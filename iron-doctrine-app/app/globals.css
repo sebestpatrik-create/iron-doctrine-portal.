@@ -475,3 +475,28 @@ select.nc-input{appearance:none;cursor:pointer}
   .pa-controls{flex-wrap:wrap}
   .pa-edit-btn{order:3}
 }
+
+/* ============ CHECK-IN HISTORY REWORK (coach) ============ */
+.cih{margin-top:6px}
+.cih-latest{background:var(--iron-2);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:14px;padding:22px 24px}
+.cih-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+.cih-date{font-family:'Anton',sans-serif;text-transform:uppercase;font-size:1.3rem;color:var(--cream);display:inline-flex;align-items:center;gap:10px;line-height:1.1}
+.cih-tag{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:.52rem;font-weight:600;color:var(--gold);border:1px solid var(--line);border-radius:999px;padding:3px 9px}
+.cih-weight{font-family:'Anton',sans-serif;font-size:1.4rem;color:var(--gold);line-height:1}
+.cih-earlier{margin-top:22px}
+.cih-earlier-h{margin-bottom:12px}
+.cih-item{margin-bottom:9px}
+.cih-mini{width:100%;display:flex;align-items:center;gap:14px;background:var(--iron-2);border:1px solid var(--line);border-radius:10px;padding:13px 16px;cursor:pointer;color:var(--cream);text-align:left;font:inherit;transition:border-color .14s}
+.cih-mini:hover{border-color:var(--gold)}
+.cih-mini-date{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.06em;font-size:.78rem;color:var(--cream);min-width:104px}
+.cih-mini-weight{font-family:'Anton',sans-serif;font-size:1rem;color:var(--gold);line-height:1}
+.cih-mini-fb{margin-left:auto;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:.56rem;color:var(--bronze)}
+.cih-mini-fb.has{color:var(--gold)}
+.cih-mini-chev{font-size:1.3rem;line-height:1;color:var(--gold);transition:transform .2s ease;flex:0 0 auto}
+.cih-item.open .cih-mini-chev{transform:rotate(180deg)}
+.cih-item.open .cih-mini{border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom-color:transparent}
+.cih-detail{border:1px solid var(--line);border-top:none;border-radius:0 0 10px 10px;padding:16px 18px;background:var(--iron)}
+@media(max-width:560px){
+  .cih-mini{flex-wrap:wrap;gap:8px 12px}
+  .cih-mini-fb{margin-left:0}
+}
