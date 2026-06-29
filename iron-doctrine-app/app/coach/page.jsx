@@ -49,8 +49,13 @@ export default async function CoachHome() {
 
       <section>
         <div className="wrap">
-          <div className="eyebrow">Coach Dashboard</div>
-          <h1 className="coach-title">Clients</h1>
+          <div className="coach-head">
+            <div>
+              <div className="eyebrow">Coach Dashboard</div>
+              <h1 className="coach-title">Clients</h1>
+            </div>
+            <a href="/coach/new" className="btn btn-primary coach-new">+ New client</a>
+          </div>
 
           <div className="coach-list">
             {clients.length === 0 && <p className="muted">No clients yet.</p>}

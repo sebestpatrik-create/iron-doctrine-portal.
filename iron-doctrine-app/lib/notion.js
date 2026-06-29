@@ -436,3 +436,22 @@ export async function archiveClientAndCheckins(clientId) {
   await notion.pages.update({ page_id: clientId, archived: true });
   return count;
 }
+
+// Create a new client row in the Clients database (in-app onboarding).
+// language: "Czech"|"English"; goal: one of the Primary Goal options; status: defaults "Active".
+export async function createClientRecord({ name, email, language, goal, status }) {
+  if (!hasNotion) throw new Error("Notion not configured");
+  const properties = {
+    "Name": { title: [{ text: { content: name } }] },
+    "Status": { select: { name: status || "Active" } },
+    "Start Date": { date: { start: new Date().toISOString().slice(0, 10) } },
+  };
+  if (email) properties["Email"] = { email };
+  if (language) properties["Language"] = { select: { name: language } };
+  if (goal) properties["Primary Goal"] = { select: { name: goal } };
+  const page = await notion.pages.create({
+    parent: { database_id: DB.clients },
+    properties,
+  });
+  return page.id;
+}

@@ -333,3 +333,26 @@ footer small{display:block;margin-top:9px;color:var(--cream-dim);font-size:.78re
 .danger-go{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:.74rem;color:var(--cream);background:var(--oxblood);border:1px solid var(--oxblood);border-radius:3px;padding:10px 18px;cursor:pointer}
 .danger-go:disabled{opacity:.4;cursor:not-allowed}
 .danger-err{margin-top:14px;color:var(--gold-bright);font-size:.86rem;line-height:1.5}
+
+/* ADMIN-ONLY COACH LINK (nav) */
+.nav-coach{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:.62rem;color:var(--gold);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:5px 12px;transition:background .2s,color .2s}
+.nav-coach:hover{background:var(--gold);color:var(--iron);border-color:var(--gold)}
+
+/* COACH — new client form */
+.coach-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.coach-new{white-space:nowrap}
+.nc-wrap{max-width:560px}
+.nc-back{display:inline-block;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:.66rem;color:var(--cream-dim);text-decoration:none;margin-bottom:18px}
+.nc-intro{color:var(--cream-dim);font-size:.95rem;line-height:1.6;margin:6px 0 26px}
+.nc{display:flex;flex-direction:column;gap:16px}
+.nc-row{display:flex;gap:14px}
+.nc-row .nc-field{flex:1}
+.nc-field{display:flex;flex-direction:column;gap:7px}
+.nc-label{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:.66rem;color:var(--cream-dim)}
+.nc-label i{color:var(--bronze);font-style:normal;text-transform:none;letter-spacing:0}
+.nc-input{background:var(--iron);border:1px solid var(--line);border-radius:8px;color:var(--cream);font-size:.95rem;padding:11px 13px;font-family:inherit;width:100%}
+.nc-input:focus{outline:none;border-color:var(--gold)}
+select.nc-input{appearance:none;cursor:pointer}
+.nc-err{color:var(--gold-bright);font-size:.88rem}
+.nc-actions{display:flex;align-items:center;justify-content:flex-end;gap:16px;margin-top:6px}
+.nc-cancel{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:.74rem;color:var(--cream-dim);text-decoration:none}
