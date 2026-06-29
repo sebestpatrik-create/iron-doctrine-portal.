@@ -410,3 +410,48 @@ select.nc-input{appearance:none;cursor:pointer}
 /* PROGRAM EDIT LINK */
 .pa-edit{margin-left:10px;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:.6rem;color:var(--gold);text-decoration:none;border-bottom:1px solid var(--line)}
 .pa-edit:hover{color:var(--gold-bright)}
+
+/* ============ CLIENT PORTAL — LEDGER LAYOUT ============ */
+.portal{padding:44px 0 10px}
+.portal-grid{display:grid;grid-template-columns:1.62fr 1fr;gap:22px;align-items:start}
+.col-main{display:flex;flex-direction:column;gap:22px;min-width:0}
+.col-rail{display:flex;flex-direction:column;gap:22px;min-width:0}
+.p-card{background:var(--iron-2);border:1px solid var(--line);border-radius:14px;padding:26px}
+/* disciplined eyebrow tick (portal-scoped) */
+.portal .eyebrow,.coachnote .eyebrow{display:inline-flex;align-items:center;gap:9px}
+.portal .eyebrow::before,.coachnote .eyebrow::before{content:"";width:16px;height:1px;background:var(--gold);flex:0 0 auto}
+/* collapsible sits cleanly inside a card */
+.p-card .collapse{border-top:none}
+.p-card .collapse-head{padding:0}
+.p-card .collapse.open .collapse-head{padding-bottom:18px}
+.p-card .collapse-body{padding-bottom:0}
+.p-program .sec-title{font-size:clamp(1.45rem,2.5vw,2rem)}
+.p-coachwrap{display:flex;flex-direction:column}
+/* rail cards */
+.rail-card .rail-title{font-family:'Anton',sans-serif;text-transform:uppercase;font-size:1.5rem;line-height:1.08;margin:10px 0 16px;color:var(--cream)}
+.rail-stats{display:flex;gap:10px;margin-top:16px}
+.rstat{flex:1;border:1px solid var(--line);border-radius:9px;padding:13px 10px;text-align:center}
+.rstat .k{display:block;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:.54rem;color:var(--cream-dim);margin-bottom:5px}
+.rstat .v{font-family:'Anton',sans-serif;font-size:1.5rem;color:var(--cream);line-height:1}
+.rstat .v small{font-family:'Oswald',sans-serif;font-size:.66rem;color:var(--gold);font-weight:600;margin-left:3px}
+.rail-goal{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.rail-goal .k{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:.6rem;color:var(--cream-dim)}
+.rail-goal .gv{font-family:'Spectral',Georgia,serif;font-size:1rem;color:var(--gold-bright)}
+/* rail nutrition: 2x2 macros + meals rollout */
+.col-rail .macros{grid-template-columns:repeat(2,1fr)}
+.col-rail .macro{padding:18px 14px}
+.col-rail .macro .v{font-size:1.75rem}
+.rail-meals{margin-top:16px;border-top:1px solid var(--line)}
+.rail-meals .collapse{border-top:none}
+.rail-meals .collapse-head{padding:14px 0 0}
+.rail-meals .collapse-body{padding-bottom:0}
+/* full-width photos + check-in band */
+.portal-full{margin-top:22px}
+.checkin-band{margin:22px 0 6px;background:var(--iron-2);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:14px;padding:28px 30px;display:flex;align-items:center;justify-content:space-between;gap:22px;flex-wrap:wrap}
+.checkin-band .cb-copy{max-width:540px;min-width:240px}
+.checkin-band h2{font-family:'Anton',sans-serif;text-transform:uppercase;font-size:clamp(1.4rem,3vw,2rem);line-height:1.05;margin:9px 0 8px}
+.checkin-band p{color:var(--cream-dim);font-size:.95rem;margin:0;line-height:1.5}
+@media(max-width:860px){
+  .portal-grid{grid-template-columns:1fr}
+  .portal{padding:30px 0 8px}
+}
