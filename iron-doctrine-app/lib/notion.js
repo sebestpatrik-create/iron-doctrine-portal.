@@ -531,3 +531,101 @@ export async function clearActivePlan(type, clientId) {
   }
   return active.results.length;
 }
+
+// Flat exercise library list for the builder's picker.
+export async function getExerciseLibraryList() {
+  if (!hasNotion) return [];
+  const lib = await loadExerciseLibrary();
+  return [...lib.entries()]
+    .map(([id, v]) => ({ id, nameEN: v.nameEN || "", nameCZ: v.nameCZ || "" }))
+    .sort((a, b) => (a.nameCZ || a.nameEN).localeCompare(b.nameCZ || b.nameEN, "cs"));
+}
+
+// Create or update a program + all its Program Exercises rows (replace strategy).
+const RTV = (s) => ({ rich_text: s ? [{ text: { content: String(s).slice(0, 2000) } }] : [] });
+const FOCUS_OPTS = ["Hypertrophy", "Strength", "Fat loss", "Recomp", "Conditioning"];
+
+export async function saveProgram({ programId, title: progTitle, focus, daysPerWeek, notes, clientId, active, days }) {
+  if (!hasNotion) throw new Error("Notion not configured");
+  const status = active && clientId ? "Active" : "Draft";
+
+  const progProps = {
+    Program: { title: [{ text: { content: (progTitle || "Untitled program").slice(0, 200) } }] },
+    Status: { select: { name: status } },
+    Client: { relation: clientId ? [{ id: clientId }] : [] },
+    Notes: RTV(notes),
+  };
+  if (FOCUS_OPTS.includes(focus)) progProps["Focus"] = { select: { name: focus } };
+  const dw = daysPerWeek != null && daysPerWeek !== "" ? Number(daysPerWeek) : (Array.isArray(days) ? days.length : null);
+  if (dw != null && !Number.isNaN(dw)) progProps["Days / Week"] = { number: dw };
+
+  let pid = programId || null;
+  if (pid) {
+    await notion.pages.update({ page_id: pid, properties: progProps });
+    // Replace strategy: archive existing exercise rows for this program.
+    let cursor;
+    do {
+      const ex = await notion.databases.query({
+        database_id: DB.progExercises,
+        filter: { property: "Program", relation: { contains: pid } },
+        page_size: 100,
+        start_cursor: cursor,
+      });
+      for (const r of ex.results) await notion.pages.update({ page_id: r.id, archived: true });
+      cursor = ex.has_more ? ex.next_cursor : undefined;
+    } while (cursor);
+  } else {
+    const page = await notion.pages.create({ parent: { database_id: DB.programs }, properties: progProps });
+    pid = page.id;
+  }
+
+  // If this becomes the client's active program, retire their other active ones.
+  if (status === "Active" && clientId) {
+    const act = await notion.databases.query({
+      database_id: DB.programs,
+      filter: {
+        and: [
+          { property: "Client", relation: { contains: clientId } },
+          { property: "Status", select: { equals: "Active" } },
+        ],
+      },
+      page_size: 25,
+    });
+    for (const r of act.results) {
+      if (normId(r.id) !== normId(pid)) {
+        await notion.pages.update({ page_id: r.id, properties: { Status: { select: { name: "Archived" } } } });
+      }
+    }
+  }
+
+  // Build and create the exercise rows.
+  const rows = [];
+  (days || []).forEach((day, di) => {
+    (day.exercises || []).forEach((exr, oi) => {
+      if (!exr || !exr.exerciseId) return;
+      rows.push({
+        parent: { database_id: DB.progExercises },
+        properties: {
+          Label: { title: [{ text: { content: (exr.name || "Exercise").slice(0, 100) } }] },
+          Exercise: { relation: [{ id: exr.exerciseId }] },
+          Program: { relation: [{ id: pid }] },
+          Day: { number: di + 1 },
+          Order: { number: oi + 1 },
+          "Day Label": RTV(day.label),
+          Sets: RTV(exr.sets),
+          Reps: RTV(exr.reps),
+          RPE: RTV(exr.rpe),
+          Tempo: RTV(exr.tempo),
+          Load: RTV(exr.load),
+          Rest: RTV(exr.rest),
+          Note: RTV(exr.note),
+        },
+      });
+    });
+  });
+  for (let i = 0; i < rows.length; i += 4) {
+    await Promise.all(rows.slice(i, i + 4).map((r) => notion.pages.create(r)));
+  }
+
+  return pid;
+}

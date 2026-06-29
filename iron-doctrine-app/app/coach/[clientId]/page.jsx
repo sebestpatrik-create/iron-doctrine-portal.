@@ -99,6 +99,7 @@ export default async function CoachClient({ params }) {
           <h1 className="coach-title">{name || "Client"}</h1>
 
           <PlanAssign clientId={clientId} sections={planSections} />
+          <a href={`/coach/program/new?client=${clientId}`} className="coach-newprog coach-newprog-inline">+ Build a program for {name || "this client"}</a>
 
           <div className="coach-block">
             <div className="eyebrow">Bodyweight</div>

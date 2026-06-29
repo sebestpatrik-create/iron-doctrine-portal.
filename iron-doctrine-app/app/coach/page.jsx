@@ -56,6 +56,9 @@ export default async function CoachHome() {
             </div>
             <a href="/coach/new" className="btn btn-primary coach-new">+ New client</a>
           </div>
+          <div className="coach-subactions">
+            <a href="/coach/program/new" className="coach-newprog">+ Build a program</a>
+          </div>
 
           <div className="coach-list">
             {clients.length === 0 && <p className="muted">No clients yet.</p>}
