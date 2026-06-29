@@ -394,7 +394,16 @@ export async function getLatestCheckins() {
       const rel = pr["Client"] && pr["Client"].relation;
       const cid = rel && rel[0] && rel[0].id;
       if (!cid) continue;
-      if (!map[cid]) map[cid] = { date: dateStart(pr["Date"]) || "", weight: num(pr["Weight"]), count: 0 };
+      if (!map[cid]) {
+        // First row seen for this client = their latest check-in (sorted desc).
+        const feedback = rt(pr["Coach Feedback"] && pr["Coach Feedback"].rich_text);
+        map[cid] = {
+          date: dateStart(pr["Date"]) || "",
+          weight: num(pr["Weight"]),
+          count: 0,
+          awaitingFeedback: !feedback || !feedback.trim(),
+        };
+      }
       map[cid].count += 1;
     }
     return map;
@@ -557,10 +566,15 @@ export async function clearActivePlan(type, clientId) {
 // Flat exercise library list for the builder's picker.
 export async function getExerciseLibraryList() {
   if (!hasNotion) return [];
-  const lib = await loadExerciseLibrary();
-  return [...lib.entries()]
-    .map(([id, v]) => ({ id, nameEN: v.nameEN || "", nameCZ: v.nameCZ || "" }))
-    .sort((a, b) => (a.nameCZ || a.nameEN).localeCompare(b.nameCZ || b.nameEN, "cs"));
+  try {
+    const arr = await getCachedExerciseLibrary();
+    return arr
+      .map((e) => ({ id: e.id, nameEN: e.nameEN || "", nameCZ: e.nameCZ || "" }))
+      .sort((a, b) => (a.nameCZ || a.nameEN).localeCompare(b.nameCZ || b.nameEN, "cs"));
+  } catch (err) {
+    console.error("getExerciseLibraryList failed:", err.message);
+    return [];
+  }
 }
 
 // Create or update a program + all its Program Exercises rows (replace strategy).
@@ -704,4 +718,3 @@ export async function getProgramForEdit(programId) {
     return null;
   }
 }
-

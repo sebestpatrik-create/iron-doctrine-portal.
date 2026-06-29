@@ -29,11 +29,21 @@ export default async function CoachHome() {
   if (!ADMINS.includes((user.email || "").toLowerCase())) redirect("/portal");
 
   const [clients, latest] = await Promise.all([getClients(), getLatestCheckins()]);
+
+  // Triage: clients whose latest check-in has no coach feedback rise to the top,
+  // most-overdue (oldest unanswered) first.
+  const awaiting = (c) => (latest[c.id] && latest[c.id].awaitingFeedback ? 0 : 1);
   clients.sort(
     (a, b) =>
+      awaiting(a) - awaiting(b) ||
+      (awaiting(a) === 0
+        ? new Date(latest[a.id].date || 0) - new Date(latest[b.id].date || 0)
+        : 0) ||
       (STATUS_ORDER[a.status] ?? 9) - (STATUS_ORDER[b.status] ?? 9) ||
       a.name.localeCompare(b.name)
   );
+  const needsCount = clients.filter((c) => latest[c.id] && latest[c.id].awaitingFeedback).length;
+  const anyCheckins = clients.some((c) => latest[c.id]);
 
   return (
     <main className="coach">
@@ -60,16 +70,29 @@ export default async function CoachHome() {
             </div>
           </div>
 
+          {needsCount > 0 ? (
+            <div className="triage-banner">
+              <span className="triage-count">{needsCount}</span>
+              <span>{needsCount === 1 ? "client is" : "clients are"} waiting on your feedback</span>
+            </div>
+          ) : anyCheckins ? (
+            <div className="triage-banner clear">All caught up — every latest check-in has your feedback.</div>
+          ) : null}
+
           <div className="coach-list">
             {clients.length === 0 && <p className="muted">No clients yet.</p>}
             {clients.map((c) => {
               const ci = latest[c.id];
+              const needs = ci && ci.awaitingFeedback;
               return (
-                <a key={c.id} href={`/coach/${c.id}`} className="coach-card">
+                <a key={c.id} href={`/coach/${c.id}`} className={"coach-card" + (needs ? " needs" : "")}>
                   <div className="coach-card-main">
                     <span className="coach-name">{c.name}</span>
-                    <span className={"coach-status s-" + (c.status || "none").toLowerCase()}>
-                      {c.status || "—"}
+                    <span className="coach-card-tags">
+                      {needs && <span className="needs-pill">Needs feedback</span>}
+                      <span className={"coach-status s-" + (c.status || "none").toLowerCase()}>
+                        {c.status || "—"}
+                      </span>
                     </span>
                   </div>
                   <div className="coach-card-meta">
