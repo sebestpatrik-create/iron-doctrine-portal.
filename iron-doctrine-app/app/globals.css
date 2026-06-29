@@ -356,3 +356,20 @@ select.nc-input{appearance:none;cursor:pointer}
 .nc-err{color:var(--gold-bright);font-size:.88rem}
 .nc-actions{display:flex;align-items:center;justify-content:flex-end;gap:16px;margin-top:6px}
 .nc-cancel{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:.74rem;color:var(--cream-dim);text-decoration:none}
+
+/* PLAN ASSIGNMENT (coach) */
+.pa{margin:8px 0 30px;border:1px solid var(--line);border-radius:12px;padding:20px;background:var(--iron-2)}
+.pa-h{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.14em;font-size:.66rem;color:var(--gold);margin-bottom:16px}
+.pa-grid{display:flex;flex-direction:column;gap:18px}
+.pa-row{display:flex;flex-direction:column;gap:9px}
+.pa-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pa-label{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:.72rem;color:var(--cream-dim)}
+.pa-current{font-family:Spectral,Georgia,serif;font-size:1rem;color:var(--cream)}
+.pa-none{color:var(--bronze);font-style:italic}
+.pa-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.pa-select{flex:1;min-width:180px;background:var(--iron);border:1px solid var(--line);border-radius:8px;color:var(--cream);font-size:.9rem;padding:10px 12px;font-family:inherit;appearance:none;cursor:pointer}
+.pa-select:focus{outline:none;border-color:var(--gold)}
+.pa-btn{font-size:.78rem;padding:9px 18px;white-space:nowrap}
+.pa-unassign{background:transparent;border:none;color:var(--cream-dim);font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:.68rem;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.pa-unassign:disabled{opacity:.4;cursor:not-allowed}
+.pa-err{color:var(--gold-bright);font-size:.84rem}

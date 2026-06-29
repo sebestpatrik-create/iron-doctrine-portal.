@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation";
 import { createClient } from "../../../lib/supabase/server.js";
-import { getClientMeta, getCheckins } from "../../../lib/notion.js";
+import { getClientMeta, getCheckins, listPlans } from "../../../lib/notion.js";
 import Chart from "../../../components/Chart.jsx";
 import ProgressGallery from "../../../components/ProgressGallery.jsx";
 import CoachFeedback from "../../../components/CoachFeedback.jsx";
 import DeleteClient from "../../../components/DeleteClient.jsx";
+import PlanAssign from "../../../components/PlanAssign.jsx";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +43,17 @@ export default async function CoachClient({ params }) {
 
   const { name } = await getClientMeta(clientId);
   const checkins = await getCheckins(clientId); // oldest → newest
+
+  const [progPlans, mealPlans, suppPlans] = await Promise.all([
+    listPlans("program", clientId),
+    listPlans("meal", clientId),
+    listPlans("supplement", clientId),
+  ]);
+  const planSections = [
+    { type: "program", plans: progPlans },
+    { type: "meal", plans: mealPlans },
+    { type: "supplement", plans: suppPlans },
+  ];
 
   // Sign all photos (coach session — needs the coach read policy on the bucket).
   const paths = [];
@@ -85,6 +97,8 @@ export default async function CoachClient({ params }) {
         <div className="wrap">
           <a href="/coach" className="coach-back">← All clients</a>
           <h1 className="coach-title">{name || "Client"}</h1>
+
+          <PlanAssign clientId={clientId} sections={planSections} />
 
           <div className="coach-block">
             <div className="eyebrow">Bodyweight</div>

@@ -455,3 +455,79 @@ export async function createClientRecord({ name, email, language, goal, status }
   });
   return page.id;
 }
+
+// ---- Plan assignment (programs / meal plans / supplement protocols) ----
+const PLAN_TYPES = {
+  program: { db: DB.programs, titleProp: "Program" },
+  meal: { db: DB.meals, titleProp: "Meal Plan" },
+  supplement: { db: DB.supplements, titleProp: "Protocol" },
+};
+const normId = (s) => String(s || "").replace(/-/g, "");
+
+// List every plan in a type's database, annotated for the given client.
+export async function listPlans(type, clientId) {
+  const cfg = PLAN_TYPES[type];
+  if (!hasNotion || !cfg) return [];
+  const cid = normId(clientId);
+  const res = await notion.databases.query({ database_id: cfg.db, page_size: 100 });
+  return res.results
+    .map((p) => {
+      const rel = relIds(p.properties["Client"]).map(normId);
+      return {
+        id: p.id,
+        title: title(p.properties[cfg.titleProp]) || "(untitled)",
+        status: sel(p.properties["Status"]) || "",
+        mine: rel.includes(cid),
+        otherClient: rel.length > 0 && !rel.includes(cid),
+      };
+    })
+    .sort((a, b) => a.title.localeCompare(b.title));
+}
+
+// Assign a plan to a client: retire the current active one, bind + activate the chosen one.
+export async function assignPlan(type, planId, clientId) {
+  const cfg = PLAN_TYPES[type];
+  if (!hasNotion || !cfg) throw new Error("bad plan type");
+  const active = await notion.databases.query({
+    database_id: cfg.db,
+    filter: {
+      and: [
+        { property: "Client", relation: { contains: clientId } },
+        { property: "Status", select: { equals: "Active" } },
+      ],
+    },
+    page_size: 25,
+  });
+  for (const row of active.results) {
+    if (normId(row.id) !== normId(planId)) {
+      await notion.pages.update({ page_id: row.id, properties: { Status: { select: { name: "Archived" } } } });
+    }
+  }
+  await notion.pages.update({
+    page_id: planId,
+    properties: {
+      Client: { relation: [{ id: clientId }] },
+      Status: { select: { name: "Active" } },
+    },
+  });
+}
+
+// Unassign: archive whatever active plan of this type the client currently has.
+export async function clearActivePlan(type, clientId) {
+  const cfg = PLAN_TYPES[type];
+  if (!hasNotion || !cfg) throw new Error("bad plan type");
+  const active = await notion.databases.query({
+    database_id: cfg.db,
+    filter: {
+      and: [
+        { property: "Client", relation: { contains: clientId } },
+        { property: "Status", select: { equals: "Active" } },
+      ],
+    },
+    page_size: 25,
+  });
+  for (const row of active.results) {
+    await notion.pages.update({ page_id: row.id, properties: { Status: { select: { name: "Archived" } } } });
+  }
+  return active.results.length;
+}
