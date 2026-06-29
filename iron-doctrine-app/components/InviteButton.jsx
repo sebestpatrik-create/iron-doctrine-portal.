@@ -1,12 +1,10 @@
 "use client";
 import { useState } from "react";
-import { createClient } from "../lib/supabase/client.js";
 
-// Sends the client their magic-link login email — the same one the normal login
-// flow uses (and it creates their auth user if they don't have one yet). Runs
-// from the coach's browser; it only triggers an email, so it never touches the
-// coach's own session.
-export default function InviteButton({ email, name }) {
+// Sends the client their branded, bilingual invite email (via /api/coach/invite,
+// which mints a magic link and sends through Brevo). Runs from the coach's
+// browser but only triggers a server send — never touches the coach session.
+export default function InviteButton({ clientId, email, name }) {
   const [state, setState] = useState("idle"); // idle | sending | sent | error
   const [msg, setMsg] = useState("");
 
@@ -18,20 +16,27 @@ export default function InviteButton({ email, name }) {
     setState("sending");
     setMsg("");
     try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.signInWithOtp({
-        email: email.trim(),
-        options: { emailRedirectTo: `${window.location.origin}/auth/confirm` },
+      const res = await fetch("/api/coach/invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clientId, origin: window.location.origin }),
       });
-      if (error) {
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) {
         setState("error");
-        setMsg(error.message || "Couldn't send — try again.");
+        setMsg(
+          data?.error === "email_not_configured"
+            ? "Email isn't configured yet (missing Brevo key)."
+            : data?.error === "no_email"
+            ? "No email on file for this client."
+            : "Couldn't send — please try again."
+        );
         return;
       }
       setState("sent");
     } catch {
       setState("error");
-      setMsg("Something went wrong — try again.");
+      setMsg("Something went wrong — please try again.");
     }
   }
 
@@ -43,10 +48,10 @@ export default function InviteButton({ email, name }) {
         onClick={send}
         disabled={state === "sending" || state === "sent"}
       >
-        {state === "sending" ? "Sending…" : state === "sent" ? "✓ Link sent" : "✉ Send login link"}
+        {state === "sending" ? "Sending…" : state === "sent" ? "✓ Invite sent" : "✉ Send invite email"}
       </button>
       {state === "sent" && (
-        <span className="invite-ok">{name ? name.split(" ")[0] : "They"} will get a magic link at {email}.</span>
+        <span className="invite-ok">{name ? name.split(" ")[0] : "They"} will get a branded login email at {email}.</span>
       )}
       {state === "error" && <span className="invite-err">{msg}</span>}
     </span>

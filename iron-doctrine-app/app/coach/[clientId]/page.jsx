@@ -99,7 +99,7 @@ export default async function CoachClient({ params }) {
           <a href="/coach" className="coach-back">← All clients</a>
           <div className="coach-title-row">
             <h1 className="coach-title">{name || "Client"}</h1>
-            <InviteButton email={email} name={name} />
+            <InviteButton clientId={clientId} email={email} name={name} />
           </div>
 
           <PlanAssign clientId={clientId} sections={planSections} />
