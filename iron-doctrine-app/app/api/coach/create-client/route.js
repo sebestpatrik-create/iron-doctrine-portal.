@@ -8,7 +8,7 @@ const ADMINS = (process.env.ADMIN_EMAILS || "")
   .filter(Boolean);
 
 const LANGS = ["Czech", "English"];
-const GOALS = ["Build muscle", "Lose fat", "Strength", "Recomp", "General fitness"];
+const GOALS = ["Lifestyle", "Competition"];
 const STATUSES = ["Active", "Lead", "Paused", "Inactive"];
 
 export async function POST(request) {

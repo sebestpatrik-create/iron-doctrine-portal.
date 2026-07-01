@@ -59,7 +59,7 @@ export default function PortalView({ d, lang, signOut, progress, coachNotes, isA
         <img src="/badge.png" alt="" className="hero-badge" aria-hidden="true" />
         <div className="wrap hero-inner">
           {d.weekLabel && <div className="hero-eyebrow eyebrow">{d.weekLabel}</div>}
-          <h1 className="greet">{t(lang, "welcomeBack")}<br /><b>{d.name}</b></h1>
+          <h1 className="greet">{t(lang, "welcome")}<br /><b>{d.name}</b></h1>
           <p className="hero-line">{t(lang, "todayDefault")}</p>
           <div className="actions">
             <a href="/portal/check-in" className="btn btn-primary">{t(lang, "submitCheckin")}</a>

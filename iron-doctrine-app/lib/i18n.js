@@ -4,7 +4,7 @@
 export const STRINGS = {
   en: {
     member: "Member",
-    welcomeBack: "Welcome back,",
+    welcome: "Welcome,",
     todayDefault: "Your plan is ready. Five quality sessions beat fifty half-hearted ones.",
     program: "Your program",
     progress: "Progress",
@@ -48,7 +48,7 @@ export const STRINGS = {
   },
   cz: {
     member: "Klient",
-    welcomeBack: "Vítej zpět,",
+    welcome: "Vítej,",
     todayDefault: "Tvůj plán je připravený. Pět kvalitních tréninků je víc než padesát odbytých.",
     program: "Tvůj plán",
     progress: "Pokrok",
@@ -92,8 +92,12 @@ export const STRINGS = {
   },
 };
 
-// Translations for the Primary Goal select values used in Notion.
+// Translations for the Primary Goal select values (English stored -> Czech display).
 const GOALS = {
+  // Current goal options
+  "Lifestyle": { cz: "Životní styl" },
+  "Competition": { cz: "Soutěž" },
+  // Legacy values (kept so any older/test records still translate)
   "Build muscle": { cz: "Nabrat svaly" },
   "Fat loss": { cz: "Hubnutí" },
   "Lose weight": { cz: "Zhubnout" },

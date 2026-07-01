@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-const GOALS = ["Build muscle", "Lose fat", "Strength", "Recomp", "General fitness"];
+const GOALS = ["Lifestyle", "Competition"];
 const STATUSES = ["Active", "Lead", "Paused", "Inactive"];
 
 export default function NewClientForm() {
