@@ -242,9 +242,7 @@ export async function createCheckin({ clientId, date, weight, ratings, note, pho
     if (typeof v === "number" && v >= 1 && v <= 5) row[k] = v;
   }
   if (note) row.client_note = note;
-  if (photos && photos.front) row.photo_front = photos.front;
-  if (photos && photos.side) row.photo_side = photos.side;
-  if (photos && photos.back) row.photo_back = photos.back;
+  row.photos = Array.isArray(photos) ? photos : [];
 
   const { data, error } = await sb().from("check_ins").insert(row).select("id").single();
   if (error) throw error;
@@ -273,11 +271,7 @@ export async function getCheckins(clientId) {
       },
       note: r.client_note || "",
       feedback: r.coach_feedback || "",
-      photos: {
-        front: r.photo_front || "",
-        side: r.photo_side || "",
-        back: r.photo_back || "",
-      },
+      photos: Array.isArray(r.photos) ? r.photos : [],
     }));
   } catch (err) {
     console.error("getCheckins failed:", err.message);

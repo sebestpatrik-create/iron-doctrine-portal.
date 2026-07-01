@@ -32,12 +32,8 @@ export async function POST(request) {
 
   // A photo path is only accepted if it lives under this user's own folder.
   const prefix = `${user.id}/`;
-  const guard = (p) => (typeof p === "string" && p.startsWith(prefix) ? p : null);
-  const safePhotos = {
-    front: guard(photos && photos.front),
-    side: guard(photos && photos.side),
-    back: guard(photos && photos.back),
-  };
+  const list = Array.isArray(photos) ? photos : [];
+  const safePhotos = list.filter((p) => typeof p === "string" && p.startsWith(prefix)).slice(0, 10);
 
   const cleanRatings = {};
   for (const k of ["energy", "strength", "sleep", "motivation", "digestion"]) {
@@ -57,7 +53,7 @@ export async function POST(request) {
       photos: safePhotos,
     });
     // Photos are health data — reaffirm consent timestamp on each photo upload.
-    if (safePhotos.front || safePhotos.side || safePhotos.back) {
+    if (safePhotos.length) {
       try { await setClientConsent(clientId, POLICY_VERSION); } catch (e) { console.error("consent restamp:", e.message); }
     }
     return NextResponse.json({ ok: true });

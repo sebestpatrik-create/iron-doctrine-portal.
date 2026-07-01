@@ -1,22 +1,30 @@
 -- =====================================================================
---  IRON DOCTRINE — Phase 1 schema (lift-and-shift from Notion)
---  Run this in: Supabase Dashboard -> SQL Editor -> New query -> Run
+--  IRON DOCTRINE — Phase 1 schema (lift-and-shift + multi-tenant)
+--  Run in: Supabase Dashboard -> SQL Editor -> New query -> Run
 --
---  This mirrors the CURRENT Notion model exactly. No new features here
---  (new Primary Goal options, new set scheme, new check-in fields all
---  come later, deliberately). RLS is added in a SEPARATE file (002).
---
---  Conventions used on every table:
---    id          uuid  -- the row's permanent unique key (auto-generated)
---    notion_id   text  -- the original Notion page id, for the one-time
---                         data migration + rollback safety (dropped later)
---    created_at / updated_at  -- automatic audit timestamps
+--  CLEAN COMBINED schema. Drops the empty tables from the first run and
+--  recreates everything, now with multi-coach support:
+--    - a `coaches` table (each coach is a row, linked to their auth login)
+--    - `clients.coach_id` so every client belongs to exactly one coach
+--    - helper functions the RLS policies (file 002) build on
+--  Faithful lift-and-shift otherwise: no new feature columns.
+--  RLS is ENABLED + POLICIED in the separate 002 file.
 -- =====================================================================
 
--- gen_random_uuid() lives in the pgcrypto extension; make sure it's on.
+-- ---- Clean slate (safe: these tables are empty) --------------------
+drop table if exists check_ins            cascade;
+drop table if exists program_exercises    cascade;
+drop table if exists programs             cascade;
+drop table if exists meal_plans           cascade;
+drop table if exists supplement_protocols cascade;
+drop table if exists meal_plan_library    cascade;
+drop table if exists supplement_library   cascade;
+drop table if exists exercises            cascade;
+drop table if exists clients              cascade;
+drop table if exists coaches              cascade;
+
 create extension if not exists pgcrypto;
 
--- A tiny helper so every table can auto-maintain updated_at on UPDATE.
 create or replace function set_updated_at()
 returns trigger language plpgsql as $$
 begin
@@ -26,42 +34,75 @@ end;
 $$;
 
 -- =====================================================================
---  1) CLIENTS  — the hub. Everything else points back here.
+--  0) COACHES  — NEW. Each coach is a row. Makes the app multi-tenant.
+-- =====================================================================
+create table coaches (
+  id            uuid primary key default gen_random_uuid(),
+  auth_user_id  uuid unique references auth.users(id) on delete set null,
+  name          text not null,
+  email         text,
+  role          text not null default 'coach'
+                  check (role in ('coach','platform_admin')),
+  status        text not null default 'active'
+                  check (status in ('active','paused','disabled')),
+  created_at    timestamptz default now(),
+  updated_at    timestamptz default now()
+);
+create index coaches_auth_user_id_idx on coaches(auth_user_id);
+create trigger coaches_set_updated_at before update on coaches
+  for each row execute function set_updated_at();
+
+-- =====================================================================
+--  RLS HELPER FUNCTIONS (used by policies in file 002)
+--  SECURITY DEFINER lets these read `coaches` without tripping its RLS.
+-- =====================================================================
+create or replace function current_coach_id()
+returns uuid language sql stable security definer set search_path = public as $$
+  select id from coaches where auth_user_id = auth.uid() limit 1;
+$$;
+
+create or replace function is_platform_admin()
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (
+    select 1 from coaches
+    where auth_user_id = auth.uid() and role = 'platform_admin'
+  );
+$$;
+
+-- =====================================================================
+--  1) CLIENTS  — now owned by a coach (coach_id).
 -- =====================================================================
 create table clients (
   id               uuid primary key default gen_random_uuid(),
-  notion_id        text unique,                       -- migration bridge
+  notion_id        text unique,
+  coach_id         uuid references coaches(id) on delete set null,
   auth_user_id     uuid references auth.users(id) on delete set null,
-                                                       -- THE login link:
-                                                       -- ties a client row to their Supabase auth user.
-                                                       -- Replaces the old email-lookup. Nullable because a
-                                                       -- client can exist before they've ever logged in.
   name             text not null,
-  email            text,                              -- still stored; used to find/invite before auth link exists
-  language         text default 'Czech',              -- 'Czech' | 'English' (flexible text, per your call)
-  primary_goal     text,                              -- current Notion values; changes to Lifestyle/Competition in Phase 2
+  email            text,
+  language         text default 'Czech',
+  primary_goal     text,
   status           text default 'Active'
-                     check (status in ('Lead','Active','Paused','Inactive')),  -- stable set -> CHECK is safe
+                     check (status in ('Lead','Active','Paused','Inactive')),
   start_date       date,
-  service          text,                              -- was multi-select; flattened to text for now
+  service          text,
   height_cm        numeric,
   phone            text,
   instagram        text,
   notes            text,
-  -- GDPR (mirrors the consent fields we added to Notion)
   consent_given    boolean default false,
   consent_date     timestamptz,
   policy_version   text,
   created_at       timestamptz default now(),
   updated_at       timestamptz default now()
 );
-create index clients_auth_user_id_idx on clients(auth_user_id);
-create index clients_email_idx        on clients(lower(email));
+create index clients_coach_id_idx      on clients(coach_id);
+create index clients_auth_user_id_idx  on clients(auth_user_id);
+create index clients_email_idx         on clients(lower(email));
 create trigger clients_set_updated_at before update on clients
   for each row execute function set_updated_at();
 
 -- =====================================================================
---  2) EXERCISES  — your bilingual library (stands alone).
+--  2) EXERCISES  — shared library (global for now).
 -- =====================================================================
 create table exercises (
   id             uuid primary key default gen_random_uuid(),
@@ -73,7 +114,7 @@ create table exercises (
   equipment      text,
   cue_en         text,
   cue_cz         text,
-  video          text,                                -- URL (mostly empty today)
+  video          text,
   created_at     timestamptz default now(),
   updated_at     timestamptz default now()
 );
@@ -81,17 +122,16 @@ create trigger exercises_set_updated_at before update on exercises
   for each row execute function set_updated_at();
 
 -- =====================================================================
---  3) PROGRAMS  — training blocks. Each belongs to one client.
+--  3) PROGRAMS
 -- =====================================================================
 create table programs (
   id             uuid primary key default gen_random_uuid(),
   notion_id      text unique,
   client_id      uuid references clients(id) on delete cascade,
-                                                       -- delete a client -> their programs go too (clean)
   title          text not null,
   status         text default 'Draft'
                    check (status in ('Draft','Active','Completed','Archived')),
-  focus          text,                                -- Hypertrophy/Strength/... (flexible text)
+  focus          text,
   days_per_week  integer,
   notes          text,
   start_date     date,
@@ -105,22 +145,19 @@ create trigger programs_set_updated_at before update on programs
   for each row execute function set_updated_at();
 
 -- =====================================================================
---  4) PROGRAM_EXERCISES  — the JOIN table: an exercise, in a program,
---     on a given day, with its scheme. Sits between programs & exercises.
+--  4) PROGRAM_EXERCISES  — the join.
 -- =====================================================================
 create table program_exercises (
   id            uuid primary key default gen_random_uuid(),
   notion_id     text unique,
   program_id    uuid not null references programs(id)  on delete cascade,
   exercise_id   uuid          references exercises(id) on delete set null,
-                                                       -- keep the row (fallback label) even if a library
-                                                       -- exercise is later deleted
-  label         text,                                 -- fallback name (title in Notion)
+  label         text,
   day           integer,
-  sort_order    integer,                              -- "Order" in Notion ("order" is a reserved word in SQL)
+  sort_order    integer,
   day_label     text,
-  sets          text,   -- all scheme fields stay text (they hold "8-12", "2 min", etc.)
-  reps          text,   -- these get REPLACED by the new eccentric/concentric/contraction scheme in Phase 2
+  sets          text,
+  reps          text,
   rpe           text,
   tempo         text,
   load          text,
@@ -134,8 +171,7 @@ create trigger program_exercises_set_updated_at before update on program_exercis
   for each row execute function set_updated_at();
 
 -- =====================================================================
---  5) MEAL_PLANS  — SHELL ONLY (per your call: no dirty body_md).
---     Real content comes with the nutrition rebuild.
+--  5) MEAL_PLANS  — SHELL ONLY.
 -- =====================================================================
 create table meal_plans (
   id          uuid primary key default gen_random_uuid(),
@@ -157,7 +193,7 @@ create trigger meal_plans_set_updated_at before update on meal_plans
   for each row execute function set_updated_at();
 
 -- =====================================================================
---  6) SUPPLEMENT_PROTOCOLS  — SHELL ONLY (rebuilt clean later).
+--  6) SUPPLEMENT_PROTOCOLS  — SHELL ONLY.
 -- =====================================================================
 create table supplement_protocols (
   id          uuid primary key default gen_random_uuid(),
@@ -175,7 +211,7 @@ create trigger supplement_protocols_set_updated_at before update on supplement_p
   for each row execute function set_updated_at();
 
 -- =====================================================================
---  7) CHECK_INS  — the weekly log. Photos are Storage paths (text).
+--  7) CHECK_INS
 -- =====================================================================
 create table check_ins (
   id             uuid primary key default gen_random_uuid(),
@@ -183,16 +219,14 @@ create table check_ins (
   client_id      uuid references clients(id) on delete cascade,
   date           date,
   weight         numeric,
-  energy         integer,     -- 1..5
+  energy         integer,
   strength       integer,
   sleep          integer,
   motivation     integer,
   digestion      integer,
   client_note    text,
   coach_feedback text,
-  photo_front    text,        -- Supabase Storage path {userId}/{date}/front.jpg
-  photo_side     text,
-  photo_back     text,
+  photos         jsonb not null default '[]'::jsonb,  -- up to 10 unnamed photos (was photo_front/side/back)
   created_at     timestamptz default now(),
   updated_at     timestamptz default now()
 );
@@ -201,14 +235,14 @@ create trigger check_ins_set_updated_at before update on check_ins
   for each row execute function set_updated_at();
 
 -- =====================================================================
---  8) LIBRARIES  — reusable templates. NOT tied to a client.
+--  8) LIBRARIES
 -- =====================================================================
 create table meal_plan_library (
   id          uuid primary key default gen_random_uuid(),
   notion_id   text unique,
   title       text not null,
-  diet        text,   -- Standard/Vegetarian/Vegan/High-protein
-  goal        text,   -- Lean gain/Maintenance/Fat loss
+  diet        text,
+  goal        text,
   calories    numeric,
   protein_g   numeric,
   carbs_g     numeric,
@@ -222,12 +256,12 @@ create table supplement_library (
   id          uuid primary key default gen_random_uuid(),
   notion_id   text unique,
   title       text not null,
-  goal        text,   -- Foundational/Muscle/Fat loss/Performance
+  goal        text,
   summary     text,
   created_at  timestamptz default now(),
   updated_at  timestamptz default now()
 );
 
 -- =====================================================================
---  Done. Next file (002) turns on Row-Level Security + policies.
+--  Done. Next: file 002 enables RLS + installs per-coach policies.
 -- =====================================================================

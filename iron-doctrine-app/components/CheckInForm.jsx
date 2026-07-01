@@ -2,11 +2,13 @@
 import { useState } from "react";
 import { createClient } from "../lib/supabase/client.js";
 
+const MAX_PHOTOS = 10;
+
 const DICT = {
   en: {
     weight: "Weight (kg)", ratings: "How was your week?",
     energy: "Energy", strength: "Strength", sleep: "Sleep", motivation: "Motivation", digestion: "Digestion",
-    photos: "Progress photos (optional)", front: "Front", side: "Side", back: "Back",
+    photos: "Progress photos (optional)", addPhoto: "Add",
     note: "Note for your coach", notePh: "Anything you want me to know…",
     submit: "Submit check-in", submitting: "Submitting…",
     done: "Check-in submitted", doneSub: "Nice work — see you next week.", back2: "Back to portal",
@@ -17,7 +19,7 @@ const DICT = {
   cz: {
     weight: "Váha (kg)", ratings: "Jaký byl tvůj týden?",
     energy: "Energie", strength: "Síla", sleep: "Spánek", motivation: "Motivace", digestion: "Trávení",
-    photos: "Fotky pokroku (nepovinné)", front: "Zepředu", side: "Z boku", back: "Zezadu",
+    photos: "Fotky pokroku (nepovinné)", addPhoto: "Přidat",
     note: "Vzkaz pro trenéra", notePh: "Cokoli, co bych měl vědět…",
     submit: "Odeslat check-in", submitting: "Odesílám…",
     done: "Check-in odeslán", doneSub: "Dobrá práce — uvidíme se příští týden.", back2: "Zpět na portál",
@@ -28,7 +30,6 @@ const DICT = {
 };
 
 const RATINGS = ["energy", "strength", "sleep", "motivation", "digestion"];
-const VIEWS = ["front", "side", "back"];
 
 // Shrink + re-encode a phone photo before upload (EXIF-aware).
 async function compress(file) {
@@ -48,34 +49,37 @@ export default function CheckInForm({ userId, lang }) {
   const [weight, setWeight] = useState("");
   const [ratings, setRatings] = useState({});
   const [note, setNote] = useState("");
-  const [photos, setPhotos] = useState({ front: null, side: null, back: null });
+  const [photos, setPhotos] = useState([]); // array of File, up to MAX_PHOTOS
   const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState("idle");
   const [errMsg, setErrMsg] = useState("");
 
   const setRating = (k, v) => setRatings((r) => ({ ...r, [k]: r[k] === v ? undefined : v }));
-  const pickPhoto = (view, file) => setPhotos((p) => ({ ...p, [view]: file || null }));
+  const addFiles = (fileList) => {
+    const incoming = Array.from(fileList || []);
+    if (!incoming.length) return;
+    setPhotos((prev) => [...prev, ...incoming].slice(0, MAX_PHOTOS));
+    setErrMsg("");
+  };
+  const removeAt = (i) => setPhotos((prev) => prev.filter((_, idx) => idx !== i));
 
   async function submit() {
     setErrMsg("");
     if (!weight) { setErrMsg(T.weightReq); return; }
-    const hasPhotos = VIEWS.some((v) => photos[v]);
-    if (hasPhotos && !consent) { setErrMsg(T.consentReq); return; }
+    if (photos.length && !consent) { setErrMsg(T.consentReq); return; }
     setStatus("submitting");
     try {
       const supabase = createClient();
       const date = new Date().toISOString().slice(0, 10);
-      const paths = {};
-      for (const view of VIEWS) {
-        const file = photos[view];
-        if (!file) continue;
-        const blob = await compress(file);
-        const path = `${userId}/${date}/${view}.jpg`;
+      const paths = [];
+      for (let i = 0; i < photos.length; i++) {
+        const blob = await compress(photos[i]);
+        const path = `${userId}/${date}/${i + 1}.jpg`;
         const { error } = await supabase.storage
           .from("checkins")
           .upload(path, blob, { contentType: "image/jpeg", upsert: true });
         if (error) throw error;
-        paths[view] = path;
+        paths.push(path);
       }
       const res = await fetch("/api/checkin", {
         method: "POST",
@@ -131,17 +135,23 @@ export default function CheckInForm({ userId, lang }) {
       <div className="ci-field">
         <span className="ci-label">{T.photos}</span>
         <div className="ci-photos">
-          {VIEWS.map((view) => (
-            <label className="ci-photo" key={view}>
-              <input type="file" accept="image/*" hidden
-                onChange={(e) => pickPhoto(view, e.target.files && e.target.files[0])} />
-              {photos[view]
-                ? <img src={URL.createObjectURL(photos[view])} alt={T[view]} />
-                : <span className="ci-photo-plus">+<small>{T[view]}</small></span>}
-            </label>
+          {photos.map((file, i) => (
+            <div className="ci-photo" key={i}>
+              <img src={URL.createObjectURL(file)} alt="" />
+              <button type="button" className="ci-photo-remove" aria-label="remove"
+                onClick={() => removeAt(i)}>×</button>
+            </div>
           ))}
+          {photos.length < MAX_PHOTOS && (
+            <label className="ci-photo">
+              <input type="file" accept="image/*" multiple hidden
+                onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
+              <span className="ci-photo-plus">+<small>{T.addPhoto}</small></span>
+            </label>
+          )}
         </div>
-        {VIEWS.some((v) => photos[v]) && (
+        <div className="ci-photo-count">{photos.length} / {MAX_PHOTOS}</div>
+        {photos.length > 0 && (
           <label className="ci-consent">
             <input
               type="checkbox"

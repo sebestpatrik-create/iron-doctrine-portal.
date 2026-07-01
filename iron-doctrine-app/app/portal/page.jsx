@@ -69,7 +69,7 @@ export default async function PortalPage({ searchParams }) {
   const checkins = await getCheckins(clientId);
   const paths = [];
   for (const ci of checkins) {
-    for (const v of ["front", "side", "back"]) if (ci.photos[v]) paths.push(ci.photos[v]);
+    for (const p of ci.photos || []) paths.push(p);
   }
   const signedMap = {};
   if (paths.length) {
@@ -82,11 +82,9 @@ export default async function PortalPage({ searchParams }) {
     .map((ci) => ({
       date: ci.date,
       weight: ci.weight,
-      front: ci.photos.front ? signedMap[ci.photos.front] || null : null,
-      side: ci.photos.side ? signedMap[ci.photos.side] || null : null,
-      back: ci.photos.back ? signedMap[ci.photos.back] || null : null,
+      photos: (ci.photos || []).map((p) => signedMap[p]).filter(Boolean),
     }))
-    .filter((p) => p.front || p.side || p.back);
+    .filter((p) => p.photos.length);
 
   // All check-ins that have coach feedback, newest first → shown on the portal.
   const coachNotes = [...checkins]
