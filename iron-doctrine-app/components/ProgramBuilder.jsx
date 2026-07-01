@@ -3,17 +3,67 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 const FOCUS = ["Hypertrophy", "Strength", "Fat loss", "Recomp", "Conditioning"];
+// B5 — new tempo-first set scheme (replaces sets/reps/rpe/tempo/load/rest).
 const DETAILS = [
-  ["sets", "Sets"],
+  ["workingSets", "Working sets"],
   ["reps", "Reps"],
-  ["rpe", "RPE"],
-  ["tempo", "Tempo"],
-  ["load", "Load"],
-  ["rest", "Rest"],
+  ["eccentric", "Eccentric (slow)"],
+  ["concentric", "Concentric (dynamic)"],
+  ["contraction", "Contraction"],
 ];
 
-const emptyExercise = () => ({ exerciseId: "", name: "", sets: "", reps: "", rpe: "", tempo: "", load: "", rest: "", note: "" });
+const emptyExercise = () => ({
+  exerciseId: "", name: "",
+  workingSets: "", reps: "", eccentric: "", concentric: "", contraction: "", note: "",
+});
 const emptyDay = () => ({ label: "", exercises: [emptyExercise()] });
+
+// B1 — type-ahead exercise picker. Filters the library as you type; no scrolling.
+function ExercisePicker({ library, valueName, onPick }) {
+  const [q, setQ] = useState("");
+  const [open, setOpen] = useState(false);
+  const query = q.trim().toLowerCase();
+  const matches = (query
+    ? library.filter(
+        (l) =>
+          (l.nameCZ || "").toLowerCase().includes(query) ||
+          (l.nameEN || "").toLowerCase().includes(query)
+      )
+    : library
+  ).slice(0, 8);
+
+  return (
+    <div className="pb-picker">
+      <input
+        className="pb-ex-select pb-ex-search"
+        value={open ? q : valueName || ""}
+        placeholder={valueName ? valueName : "Search exercise…"}
+        onFocus={() => { setOpen(true); setQ(""); }}
+        onChange={(e) => { setQ(e.target.value); setOpen(true); }}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
+      />
+      {open && matches.length > 0 && (
+        <ul className="pb-ex-options">
+          {matches.map((l) => (
+            <li key={l.id}>
+              <button
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  onPick(l.id, l.nameCZ || l.nameEN);
+                  setOpen(false);
+                  setQ("");
+                }}
+              >
+                {l.nameCZ ? <><b>{l.nameCZ}</b> <span>· {l.nameEN}</span></> : l.nameEN}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 export default function ProgramBuilder({ library = [], clients = [], initial = null, programId = null }) {
   const router = useRouter();
@@ -31,7 +81,6 @@ export default function ProgramBuilder({ library = [], clients = [], initial = n
     return e ? e.nameCZ || e.nameEN : "";
   };
 
-  // immutable day/exercise helpers
   const updateDay = (di, patch) => setDays((ds) => ds.map((d, i) => (i === di ? { ...d, ...patch } : d)));
   const updateExercise = (di, ei, patch) =>
     setDays((ds) =>
@@ -141,18 +190,11 @@ export default function ProgramBuilder({ library = [], clients = [], initial = n
           {day.exercises.map((ex, ei) => (
             <div className="pb-ex" key={ei}>
               <div className="pb-ex-top">
-                <select
-                  className="pb-ex-select"
-                  value={ex.exerciseId}
-                  onChange={(e) => updateExercise(di, ei, { exerciseId: e.target.value, name: libName(e.target.value) })}
-                >
-                  <option value="">Select exercise…</option>
-                  {library.map((l) => (
-                    <option key={l.id} value={l.id}>
-                      {l.nameCZ ? `${l.nameCZ} · ${l.nameEN}` : l.nameEN}
-                    </option>
-                  ))}
-                </select>
+                <ExercisePicker
+                  library={library}
+                  valueName={ex.name || libName(ex.exerciseId)}
+                  onPick={(id, name) => updateExercise(di, ei, { exerciseId: id, name })}
+                />
                 <div className="pb-ex-tools">
                   <button type="button" onClick={() => moveExercise(di, ei, -1)} title="Move up">↑</button>
                   <button type="button" onClick={() => moveExercise(di, ei, 1)} title="Move down">↓</button>
