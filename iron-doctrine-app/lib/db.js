@@ -103,12 +103,11 @@ async function buildProgramDays(programId) {
         cueEN: ex ? ex.cueEN : "",
         cueCZ: ex ? ex.cueCZ || ex.cueEN : "",
         video: ex ? ex.video : "",
-        sets: row.sets || "",
+        workingSets: row.working_sets || "",
         reps: row.reps || "",
-        rpe: row.rpe || "",
-        tempo: row.tempo || "",
-        load: row.load || "",
-        rest: row.rest || "",
+        eccentric: row.eccentric || "",
+        concentric: row.concentric || "",
+        contraction: row.contraction || "",
         note: row.note || "",
       };
       if (!daysMap.has(dayNum)) daysMap.set(dayNum, { label: dayLabel, exercises: [] });
@@ -522,12 +521,11 @@ export async function saveProgram({ programId, title: progTitle, focus, daysPerW
         day: di + 1,
         sort_order: oi + 1,
         day_label: day.label || null,
-        sets: exr.sets || null,
+        working_sets: exr.workingSets || null,
         reps: exr.reps || null,
-        rpe: exr.rpe || null,
-        tempo: exr.tempo || null,
-        load: exr.load || null,
-        rest: exr.rest || null,
+        eccentric: exr.eccentric || null,
+        concentric: exr.concentric || null,
+        contraction: exr.contraction || null,
         note: exr.note || null,
       });
     });
@@ -561,12 +559,11 @@ export async function getProgramForEdit(programId) {
       const ex = {
         exerciseId: row.exercise_id || "",
         name: row.label || "",
-        sets: row.sets || "",
+        workingSets: row.working_sets || "",
         reps: row.reps || "",
-        rpe: row.rpe || "",
-        tempo: row.tempo || "",
-        load: row.load || "",
-        rest: row.rest || "",
+        eccentric: row.eccentric || "",
+        concentric: row.concentric || "",
+        contraction: row.contraction || "",
         note: row.note || "",
       };
       if (!daysMap.has(dayNum)) daysMap.set(dayNum, { label: dayLabel, exercises: [] });

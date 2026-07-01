@@ -156,12 +156,11 @@ create table program_exercises (
   day           integer,
   sort_order    integer,
   day_label     text,
-  sets          text,
+  working_sets  text,
   reps          text,
-  rpe           text,
-  tempo         text,
-  load          text,
-  rest          text,
+  eccentric     text,   -- negative phase (slow)
+  concentric    text,   -- positive phase (dynamic)
+  contraction   text,
   note          text,
   created_at    timestamptz default now(),
   updated_at    timestamptz default now()

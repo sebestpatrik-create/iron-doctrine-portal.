@@ -530,3 +530,13 @@ select.nc-input{appearance:none;cursor:pointer}
 .ci-photo-count{font-family:var(--font-oswald),sans-serif;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--cream-dim);margin-top:8px}
 .prog-shots{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
 .prog-shots img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block}
+
+/* B1 — type-ahead exercise picker */
+.pb-picker{position:relative;flex:1}
+.pb-ex-search{width:100%}
+.pb-ex-options{position:absolute;z-index:30;left:0;right:0;top:calc(100% + 4px);margin:0;padding:6px;list-style:none;background:var(--iron-2);border:1px solid var(--line);border-radius:8px;max-height:264px;overflow:auto;box-shadow:0 10px 28px rgba(0,0,0,.45)}
+.pb-ex-options li{margin:0}
+.pb-ex-options button{width:100%;text-align:left;background:none;border:none;color:var(--cream);padding:8px 10px;border-radius:6px;cursor:pointer;font-size:.9rem;line-height:1.3}
+.pb-ex-options button:hover{background:var(--iron)}
+.pb-ex-options button b{font-weight:600}
+.pb-ex-options button span{color:var(--cream-dim);font-size:.82rem}
