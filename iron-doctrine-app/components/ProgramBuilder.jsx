@@ -7,8 +7,8 @@ const FOCUS = ["Hypertrophy", "Strength", "Fat loss", "Recomp", "Conditioning"];
 const DETAILS = [
   ["workingSets", "Working sets"],
   ["reps", "Reps"],
-  ["eccentric", "Eccentric (slow)"],
-  ["concentric", "Concentric (dynamic)"],
+  ["eccentric", "Eccentric"],
+  ["concentric", "Concentric"],
   ["contraction", "Contraction"],
 ];
 

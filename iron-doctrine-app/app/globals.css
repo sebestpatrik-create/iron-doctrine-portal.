@@ -397,7 +397,7 @@ select.nc-input{appearance:none;cursor:pointer}
 .pb-ex-tools{display:flex;gap:4px}
 .pb-ex-tools button{background:var(--iron-2);border:1px solid var(--line);color:var(--cream-dim);border-radius:6px;width:30px;height:34px;cursor:pointer;font-size:.85rem}
 .pb-ex-tools button:hover{border-color:var(--gold);color:var(--gold)}
-.pb-ex-details{display:flex;flex-wrap:wrap;gap:8px}
+.pb-ex-details{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}
 .pb-d{display:flex;flex-direction:column;gap:4px;flex:1;min-width:66px}
 .pb-d-note{flex:3;min-width:140px}
 .pb-d span{font-family:var(--font-oswald),sans-serif;text-transform:uppercase;letter-spacing:.06em;font-size:.56rem;color:var(--cream-dim)}
